@@ -8,16 +8,9 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=300;400;500;600;700;800&display=swap');
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: #030712;
-        }
-        .glow-effect {
-            box-shadow: 0 0 40px -10px rgba(14, 165, 233, 0.4);
-        }
-        .blur-bg {
-            backdrop-filter: blur(12px);
-        }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #030712; }
+        .glow-effect { box-shadow: 0 0 40px -10px rgba(14, 165, 233, 0.4); }
+        .blur-bg { backdrop-filter: blur(12px); }
     </style>
 </head>
 <body class="text-slate-100 min-h-screen flex flex-col justify-between overflow-x-hidden selection:bg-sky-500 selection:text-white">
@@ -33,18 +26,8 @@
                 </div>
                 <span class="text-2xl font-black tracking-wider bg-gradient-to-r from-white via-sky-200 to-sky-400 bg-clip-text text-transparent">CloudNET</span>
             </a>
-            
-            <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-slate-400">
-                <a href="#tariffs" class="hover:text-sky-400 transition-colors">Тарифы</a>
-                <button onclick="openModal('pc-modal')" class="text-sky-400 font-semibold hover:text-sky-300 transition-colors cursor-pointer flex items-center gap-1">
-                    <span class="w-2 h-2 rounded-full bg-sky-400 animate-ping"></span> Доступные ПК
-                </button>
-            </nav>
-
             <div id="nav-auth-section">
-                <button onclick="openModal('auth-modal')" class="px-5 py-2.5 bg-gradient-to-r from-sky-500 to-blue-600 text-slate-950 font-bold rounded-xl text-sm cursor-pointer">
-                    Личный кабинет
-                </button>
+                <button onclick="openModal('auth-modal')" class="px-5 py-2.5 bg-gradient-to-r from-sky-500 to-blue-600 text-slate-950 font-bold rounded-xl text-sm cursor-pointer">Личный кабинет</button>
             </div>
         </div>
     </header>
@@ -53,42 +36,15 @@
         <section class="max-w-7xl mx-auto px-6 pt-20 pb-16 text-center md:text-left grid md:grid-cols-2 gap-12 items-center">
             <div class="space-y-6">
                 <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-sky-500/10 border border-sky-500/30 rounded-full text-xs font-semibold text-sky-400 uppercase tracking-wider">
-                    <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Собственный WebRTC Стриминг
+                    <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Локальный Стриминг по Wi-Fi
                 </div>
                 <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight">
-                    Играй где угодно. <br>
-                    <span class="bg-gradient-to-r from-sky-400 via-blue-400 to-indigo-400 bg-clip-text text-transparent">На максималках.</span>
+                    Играй где угодно. <br><span class="bg-gradient-to-r from-sky-400 via-blue-400 to-indigo-400 bg-clip-text text-transparent">На максималках.</span>
                 </h1>
-                <p class="text-base sm:text-lg text-slate-400 max-w-xl mx-auto md:mx-0">
-                    Трансляция игрового процесса в реальном времени с минимальной задержкой прямо в твоем браузере. Подключайся и тестируй управление мышкой.
-                </p>
                 <div class="flex flex-col sm:flex-row gap-4 pt-4 justify-center md:justify-start">
                     <button onclick="openModal('pc-modal')" class="px-8 py-4 bg-gradient-to-r from-sky-500 to-blue-600 text-slate-950 font-extrabold rounded-xl text-center glow-effect hover:brightness-110 hover:-translate-y-0.5 transition-all cursor-pointer flex items-center justify-center gap-2">
                         <i data-lucide="monitor-play" class="w-5 h-5"></i> Подключиться к ПК
                     </button>
-                </div>
-            </div>
-            
-            <div class="relative flex justify-center items-center">
-                <div class="absolute w-72 h-72 bg-sky-500/30 rounded-full filter blur-[80px] -z-10 animate-pulse"></div>
-                <div class="w-full max-w-md bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-2xl space-y-4">
-                    <div class="flex justify-between items-center border-b border-slate-800 pb-4">
-                        <div class="flex items-center gap-2">
-                            <span class="w-3 h-3 rounded-full bg-red-500"></span>
-                            <span class="w-3 h-3 rounded-full bg-yellow-500"></span>
-                            <span class="w-3 h-3 rounded-full bg-green-500"></span>
-                        </div>
-                        <span class="text-xs text-slate-500" id="stream-status-label">Статус: Ожидание</span>
-                    </div>
-                    <div class="bg-slate-950 rounded-lg p-4 flex justify-between items-center border border-sky-950">
-                        <div class="flex items-center gap-3">
-                            <i data-lucide="monitor" class="text-sky-400 w-5 h-5"></i>
-                            <div>
-                                <p class="text-sm font-bold">Python WebRTC Node</p>
-                                <p class="text-xs text-slate-400" id="connection-state">Поток не активен</p>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
         </section>
@@ -96,22 +52,13 @@
 
     <div id="pc-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 blur-bg">
         <div class="bg-slate-900 border border-slate-800 w-full max-w-4xl rounded-2xl p-6 relative shadow-2xl space-y-6">
-            <button onclick="closeModal('pc-modal')" class="absolute top-4 right-4 text-slate-500 hover:text-white transition-colors cursor-pointer">
-                <i data-lucide="x" class="w-5 h-5"></i>
-            </button>
-
+            <button onclick="closeModal('pc-modal')" class="absolute top-4 right-4 text-slate-500 hover:text-white transition-colors cursor-pointer"><i data-lucide="x" class="w-5 h-5"></i></button>
+            
             <div id="pc-list-view" class="space-y-4">
-                <div class="space-y-1">
-                    <h3 class="text-xl font-bold text-white flex items-center gap-2"><i data-lucide="server" class="text-sky-400"></i> Доступные ноды</h3>
-                    <p class="text-xs text-slate-400">Нажми кнопку ниже для инициализации сессии через сервер сигналинга.</p>
-                </div>
+                <h3 class="text-xl font-bold text-white flex items-center gap-2"><i data-lucide="server" class="text-sky-400"></i> Игровые хосты</h3>
                 <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div class="flex items-start gap-3">
-                        <div class="p-2.5 bg-sky-500/10 text-sky-400 rounded-lg mt-1"><i data-lucide="cpu" class="w-5 h-5"></i></div>
-                        <div>
-                            <h4 class="font-bold text-sm">Python-Local-Node (Твой ПК)</h4>
-                            <p class="text-xs text-slate-400 mt-1">Трансляция рабочего стола Windows (30 FPS)</p>
-                        </div>
+                    <div>
+                        <h4 class="font-bold text-sm">Python-Node (Домашний сервер)</h4>
                     </div>
                     <button onclick="connectToRealPC()" class="px-5 py-2.5 bg-sky-500 hover:bg-sky-400 text-slate-950 text-xs font-bold rounded-lg cursor-pointer">Запустить стрим</button>
                 </div>
@@ -119,15 +66,13 @@
 
             <div id="pc-stream-view" class="hidden space-y-4">
                 <div class="flex justify-between items-center">
-                    <h3 class="text-lg font-bold text-sky-400 flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span> Прямое подключение WebRTC</h3>
-                    <button onclick="disconnectStream()" class="px-3 py-1.5 bg-red-500/10 text-red-400 border border-red-500/20 text-xs rounded-lg hover:bg-red-500 hover:text-white transition-all cursor-pointer">Прервать сессию</button>
+                    <h3 class="text-lg font-bold text-sky-400 flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span> Сессия активна</h3>
+                    <button onclick="disconnectStream()" class="px-3 py-1.5 bg-red-500/10 text-red-400 border border-red-500/20 text-xs rounded-lg cursor-pointer">Прервать поток</button>
                 </div>
-                
-                <div id="game-video-container" class="relative w-full aspect-video bg-black rounded-xl overflow-hidden border border-slate-800 group cursor-none">
+                <div id="game-video-container" class="relative w-full aspect-video bg-black rounded-xl overflow-hidden border border-slate-800 group md:cursor-none">
                     <video id="game-video-element" autoplay playsinline muted class="w-full h-full object-contain"></video>
-                    <div id="custom-cursor" class="absolute w-4 h-4 bg-sky-400 border border-white rounded-full pointer-events-none transform -translate-x-1/2 -translate-y-1/2 hidden z-50 shadow-[0_0_10px_rgba(14,165,233,0.8)]"></div>
+                    <div id="custom-cursor" class="absolute w-4 h-4 bg-sky-400 border border-white rounded-full pointer-events-none transform -translate-x-1/2 -translate-y-1/2 hidden z-50"></div>
                 </div>
-                <p class="text-[11px] text-slate-500 text-center">Кликни в плеер. Движения мыши будут ретранслироваться на удаленный компьютер.</p>
             </div>
         </div>
     </div>
@@ -135,18 +80,13 @@
     <div id="auth-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 blur-bg">
         <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-2xl p-6 relative shadow-2xl space-y-6">
             <button onclick="closeModal('auth-modal')" class="absolute top-4 right-4 text-slate-500 hover:text-white transition-colors cursor-pointer"><i data-lucide="x" class="w-5 h-5"></i></button>
-            <div class="text-center"><h3 class="text-xl font-bold text-white">Авторизация пользователя</h3></div>
             <form id="auth-form" onsubmit="handleAuth(event)" class="space-y-4">
-                <input type="email" id="auth-email" required placeholder="gamer@cloudnet.ru" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm outline-none text-white focus:border-sky-500">
-                <input type="password" id="auth-password" required placeholder="••••••••" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm outline-none text-white focus:border-sky-500">
-                <button type="submit" class="w-full py-3.5 bg-sky-500 text-slate-950 font-bold rounded-xl cursor-pointer hover:bg-sky-400 transition-colors">Войти в демо-аккаунт</button>
+                <input type="email" id="auth-email" required placeholder="gamer@cloudnet.ru" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm outline-none text-white">
+                <input type="password" id="auth-password" required placeholder="••••••••" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm outline-none text-white">
+                <button type="submit" class="w-full py-3.5 bg-sky-500 text-slate-950 font-bold rounded-xl cursor-pointer">Войти</button>
             </form>
         </div>
     </div>
-
-    <footer class="border-t border-slate-900 bg-slate-950/40 py-6 text-center text-xs text-slate-600">
-        <p>© 2026 CloudNET. Прототип облачной платформы на WebRTC + Python.</p>
-    </footer>
 
     <script>
         lucide.createIcons();
@@ -162,56 +102,37 @@
             event.preventDefault();
             const email = document.getElementById('auth-email').value;
             currentUser = { email: email };
-            document.getElementById('nav-auth-section').innerHTML = `<button onclick="openModal('auth-modal')" class="px-4 py-2 bg-slate-900 border border-slate-800 rounded-xl text-sm font-medium cursor-pointer"><span class="w-2 h-2 rounded-full bg-emerald-400 inline-block mr-1"></span> ${email.split('@')[0]}</button>`;
+            document.getElementById('nav-auth-section').innerHTML = `<button class="px-4 py-2 bg-slate-900 border border-slate-800 rounded-xl text-sm font-medium text-emerald-400">${email.split('@')[0]}</button>`;
             closeModal('auth-modal');
         }
 
-        // КЛЮЧЕВАЯ ЛОГИКА WEBRTC ПОДКЛЮЧЕНИЯ К PYTHON
         async function connectToRealPC() {
-            if (!currentUser) {
-                alert("Пожалуйста, сначала войдите в Личный кабинет (введите любую почту).");
-                closeModal('pc-modal');
-                openModal('auth-modal');
-                return;
-            }
-
+            if (!currentUser) { alert("Сначала войдите в личный кабинет (любая почта)."); return; }
             document.getElementById('pc-list-view').classList.add('hidden');
             document.getElementById('pc-stream-view').classList.remove('hidden');
-            document.getElementById('connection-state').innerText = "Подключение к сигналингу...";
 
-            // 1. Подключаемся к WebSocket-серверу
-            wsSignaling = new WebSocket('ws://localhost:8080');
-
+            // ⚠️ ЗАМЕНИ 192.168.1.50 НА СВОЙ IP ИЗ IPCONFIG
+            wsSignaling = new WebSocket('ws://192.168.1.153:8080');
+            
             wsSignaling.onopen = async () => {
-                document.getElementById('connection-state').innerText = "Создание Offer...";
-                
-                // ВАЖНЫЙ ФИКС: Принудительный семантический формат 'plan-b' для защиты aiortc от падения
                 peerConnection = new RTCPeerConnection({
                     iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
                     sdpSemantics: 'plan-b' 
                 });
 
-                // Создаем Data Channel для отправки координат мыши
                 dataChannel = peerConnection.createDataChannel("controls");
                 setupDataChannel();
 
-                // Инициализируем пустой видеотрансивер в режиме приема
                 peerConnection.addTransceiver('video', { direction: 'recvonly' });
 
-                // Когда получаем поток кадров от Python агента
                 peerConnection.ontrack = (event) => {
                     const video = document.getElementById('game-video-element');
-                    // Привязываем поток к HTML5 плееру
                     video.srcObject = event.streams[0] || new MediaStream([event.track]);
-                    document.getElementById('connection-state').innerText = "СТРИМ АКТИВЕН";
-                    document.getElementById('stream-status-label').innerText = "Статус: LIVE";
                 };
 
-                // Создаем локальное WebRTC описание (Offer)
                 const offer = await peerConnection.createOffer();
                 await peerConnection.setLocalDescription(offer);
 
-                // Отправляем запрос через сервер прослойку в Python
                 wsSignaling.send(JSON.stringify({
                     type: 'offer',
                     sdp: peerConnection.localDescription.sdp,
@@ -221,21 +142,12 @@
 
             wsSignaling.onmessage = async (event) => {
                 const msg = JSON.parse(event.data);
-                // Принимаем ответ (Answer) от Python агента
                 if (msg.type === 'answer') {
                     await peerConnection.setRemoteDescription(new RTCSessionDescription(msg));
-                    document.getElementById('connection-state').innerText = "Синхронизация потока...";
                 }
-            };
-
-            wsSignaling.onerror = () => {
-                document.getElementById('connection-state').innerText = "Ошибка сети";
-                alert("Не удалось связаться с сервером. Убедись, что запущен server.py");
-                disconnectStream();
             };
         }
 
-        // ОТПРАВКА КООРДИНАТ МЫШКИ
         function setupDataChannel() {
             const container = document.getElementById('game-video-container');
             const cursor = document.getElementById('custom-cursor');
@@ -243,47 +155,47 @@
             container.addEventListener('mouseenter', () => cursor.classList.remove('hidden'));
             container.addEventListener('mouseleave', () => cursor.classList.add('hidden'));
 
-            container.addEventListener('mousemove', (e) => {
+            function sendCoordinates(clientX, clientY) {
                 const rect = container.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
+                const x = clientX - rect.left;
+                const y = clientY - rect.top;
 
-                // Отрисовка кастомного курсора внутри браузера
                 cursor.style.left = `${x}px`;
                 cursor.style.top = `${y}px`;
 
-                // Пересчитываем координаты клика под разрешение экрана 1920x1080
                 const relativeX = Math.round((x / rect.width) * 1920);
                 const relativeY = Math.round((y / rect.height) * 1080);
 
                 if (dataChannel && dataChannel.readyState === 'open') {
-                    dataChannel.send(JSON.stringify({
-                        type: 'mousemove',
-                        x: relativeX,
-                        y: relativeY
-                    }));
+                    dataChannel.send(JSON.stringify({ type: 'mousemove', x: relativeX, y: relativeY }));
+                }
+            }
+
+            container.addEventListener('mousemove', (e) => sendCoordinates(e.clientX, e.clientY));
+            
+            container.addEventListener('mousedown', (e) => {
+                if (dataChannel && dataChannel.readyState === 'open') {
+                    dataChannel.send(JSON.stringify({ type: 'click', button: e.button === 2 ? 'right' : 'left' }));
                 }
             });
 
-            container.addEventListener('mousedown', (e) => {
-                if (dataChannel && dataChannel.readyState === 'open') {
-                    dataChannel.send(JSON.stringify({
-                        type: 'click',
-                        button: e.button === 2 ? 'right' : 'left'
-                    }));
+            // Поддержка тачскрина для телефонов
+            container.addEventListener('touchstart', (e) => {
+                if (e.touches.length > 0) {
+                    const touch = e.touches[0];
+                    sendCoordinates(touch.clientX, touch.clientY);
+                    if (dataChannel && dataChannel.readyState === 'open') {
+                        dataChannel.send(JSON.stringify({ type: 'click', button: 'left' }));
+                    }
                 }
             });
         }
 
         function disconnectStream() {
-            if (peerConnection) { peerConnection.close(); peerConnection = null; }
-            if (wsSignaling) { wsSignaling.close(); wsSignaling = null; }
-            dataChannel = null;
-            document.getElementById('game-video-element').srcObject = null;
+            if (peerConnection) peerConnection.close();
+            if (wsSignaling) wsSignaling.close();
             document.getElementById('pc-stream-view').classList.add('hidden');
             document.getElementById('pc-list-view').classList.remove('hidden');
-            document.getElementById('connection-state').innerText = "Поток не активен";
-            document.getElementById('stream-status-label').innerText = "Статус: Ожидание";
         }
     </script>
 </body>
