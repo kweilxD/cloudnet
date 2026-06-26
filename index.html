@@ -3,60 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CloudNET // System Portal</title>
+    <title>CloudNET // Global Pipeline System</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     
     <style>
         body {
             font-family: 'Share Tech Mono', monospace;
-            background-color: #06090f;
-            color: #c9d1d9;
+            background-color: #010409;
             overflow-x: hidden;
         }
-        .main-title {
+        .header-title {
             font-family: 'Orbitron', sans-serif;
-            letter-spacing: 4px;
+            text-shadow: 0 0 10px rgba(88, 166, 255, 0.4);
         }
-        /* Мягкое боковое и фоновое свечение (как на скриншоте) */
-        .ambient-glow {
-            position: fixed;
-            width: 600px;
-            height: 600px;
-            background: radial-gradient(circle, rgba(24, 78, 140, 0.12) 0%, transparent 70%);
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+        .bg-grid {
+            background-size: 40px 40px;
+            background-image: 
+                linear-gradient(to right, rgba(212, 212, 212, 0.012) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(212, 212, 212, 0.012) 1px, transparent 1px);
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
             z-index: 0;
-            pointer-events: none;
+            animation: gridMove 25s linear infinite;
         }
-        .side-glow-left {
-            position: fixed;
-            left: -150px;
-            top: 30%;
-            width: 400px;
-            height: 500px;
-            background: radial-gradient(circle, rgba(24, 78, 140, 0.08) 0%, transparent 70%);
-            z-index: 0;
-            pointer-events: none;
+        @keyframes gridMove {
+            0% { background-position: 0 0; }
+            100% { background-position: 40px 40px; }
         }
-        .side-glow-right {
-            position: fixed;
-            right: -150px;
-            top: 30%;
-            width: 400px;
-            height: 500px;
-            background: radial-gradient(circle, rgba(24, 78, 140, 0.08) 0%, transparent 70%);
-            z-index: 0;
-            pointer-events: none;
+        .glow-border-blue {
+            box-shadow: 0 0 12px rgba(56, 139, 253, 0.15);
+            border: 1px solid rgba(56, 139, 253, 0.4);
+            transition: all 0.2s ease;
         }
-        /* Стилизация панелей под оригинальный скриншот */
-        .panel-node {
-            background-color: rgba(13, 17, 23, 0.85);
-            border: 1px solid #21262d;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        .glow-border-blue:hover {
+            box-shadow: 0 0 20px rgba(56, 139, 253, 0.35);
+            border: 1px solid rgba(56, 139, 253, 0.7);
         }
-        /* Кастомный скроллбар */
         ::-webkit-scrollbar {
             width: 5px;
             height: 5px;
@@ -71,168 +54,173 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #58a6ff;
         }
-        .pulse-dot {
-            animation: pulseState 2s infinite ease-in-out;
+        .pulse-fast {
+            animation: pulseState 1.8s infinite ease-in-out;
         }
         @keyframes pulseState {
-            0%, 100% { opacity: 0.5; transform: scale(0.95); }
-            50% { opacity: 1; transform: scale(1.05); }
+            0%, 100% { transform: scale(0.95); opacity: 0.6; }
+            50% { transform: scale(1.05); opacity: 1; box-shadow: 0 0 8px currentColor; }
         }
-        .tariff-btn {
-            transition: all 0.2s ease;
+        .fade-in-card {
+            animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
-        .tariff-btn.active {
-            background-color: rgba(88, 166, 255, 0.1);
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .tariff-card-item {
+            transition: all 0.25s ease;
+        }
+        .tariff-card-item.selected {
             border-color: #58a6ff;
-            color: #58a6ff;
+            background-color: rgba(56, 139, 253, 0.07);
+            box-shadow: 0 0 15px rgba(56, 139, 253, 0.15);
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between p-4 md:p-8 select-none relative">
+<body class="text-[#c9d1d9] relative min-h-screen flex flex-col justify-between p-4 md:p-6 select-none">
+    
+    <div class="bg-grid"></div>
 
-    <div class="ambient-glow"></div>
-    <div class="side-glow-left"></div>
-    <div class="side-glow-right"></div>
-
-    <header class="w-full max-w-7xl mx-auto text-center my-6 z-10">
-        <div class="panel-node inline-block px-12 py-6 rounded-xl w-full">
-            <div class="flex items-center justify-center space-x-2 mb-1 text-[11px] uppercase tracking-widest text-[#58a6ff]">
-                <span class="w-2 h-2 rounded-full bg-[#58a6ff] pulse-dot"></span>
-                <span>Online</span>
+    <header class="w-full max-w-7xl mx-auto z-10 mb-6 animate-fade-up text-center">
+        <div class="bg-[#0d1117]/80 backdrop-blur-md border border-[#30363d] rounded-xl p-5 shadow-2xl relative overflow-hidden">
+            <div class="flex items-center justify-center space-x-2 mb-1.5">
+                <div class="w-2 h-2 bg-[#58a6ff] rounded-full pulse-fast text-[#58a6ff]"></div>
+                <span class="text-[10px] font-bold uppercase tracking-widest text-[#8b949e]">Pipeline Router v3.4 // System Core</span>
             </div>
-            <h1 class="main-title text-3xl md:text-4xl font-extrabold text-[#f0f6fc]">
-                CLOUDNET
+            <h1 class="header-title text-2xl md:text-3xl font-black tracking-widest text-[#f0f6fc]">
+                CLOUD<span class="text-[#58a6ff]">NET</span> SYSTEM
             </h1>
-            <div class="text-[11px] uppercase tracking-[6px] text-[#7d8590] mt-1 font-mono">SYSTEM</div>
-            <p class="text-xs text-[#7d8590] mt-3 max-w-md mx-auto border-t border-[#21262d] pt-2 font-mono">
-                Центральный узел маршрутизации и распределенного рендеринга.
-            </p>
+            <p class="text-[11px] text-[#7d8590] mt-1 font-mono uppercase tracking-[3px]">Центральный узел маршрутизации</p>
         </div>
     </header>
 
-    <main class="w-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch flex-grow z-10">
+    <main class="w-full max-w-7xl mx-auto z-10 flex-grow grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
         
-        <div class="lg:col-span-5 flex flex-col space-y-6">
+        <section class="lg:col-span-5 flex flex-col space-y-5 justify-between">
             
-            <div class="panel-node rounded-xl p-4 flex items-center justify-between text-xs font-mono">
-                <div class="flex items-center space-x-3">
-                    <div class="w-2 h-2 rounded-full bg-[#56d364]"></div>
-                    <div>
-                        <span class="text-[#f0f6fc] font-bold">Operator:</span>
-                        <span class="text-[#8b949e]">root_admin</span>
-                    </div>
+            <div class="bg-[#0d1117]/80 backdrop-blur-md border border-[#30363d] rounded-xl p-4 shadow-2xl font-mono text-xs space-y-3">
+                <div class="flex items-center justify-between border-b border-[#21262d] pb-2 text-[#8b949e]">
+                    <span class="uppercase tracking-wider font-bold text-[10px]">Профиль оператора</span>
+                    <span class="text-[9px] bg-[#161b22] px-1.5 py-0.5 rounded border border-[#21262d] text-[#56d364]">ACTIVE LINK</span>
                 </div>
-                <div class="text-[#7d8590] text-[11px]" id="meta-session-time"> Session: 00:00:00</div>
+                <div class="flex justify-between items-center bg-[#161b22]/50 p-2.5 rounded-lg border border-[#21262d]">
+                    <div>
+                        <div class="text-[#f0f6fc] font-bold" id="acc-username">root_operator@cloudnet</div>
+                        <div class="text-[10px] text-[#7d8590] mt-0.5">UID: <span id="acc-uid">4819-X92</span> // Balance: <span class="text-[#56d364]" id="acc-balance">1,420.00 $</span></div>
+                    </div>
+                    <button id="btn-verify-pay" class="px-3 py-1.5 bg-[#21262d] border border-[#30363d] rounded-md text-[10px] font-bold text-[#58a6ff] hover:bg-[#58a6ff]/10 hover:border-[#58a6ff] transition-all">
+                        ПРОВЕРИТЬ ОПЛАТУ
+                    </button>
+                </div>
             </div>
 
-            <div class="panel-node rounded-xl p-5 flex-grow flex flex-col justify-between min-h-[320px]">
+            <div class="bg-[#0d1117]/80 backdrop-blur-md border border-[#30363d] rounded-xl p-5 shadow-2xl flex-grow flex flex-col justify-between min-h-[250px]">
                 <div>
-                    <div class="flex justify-between items-center border-b border-[#21262d] pb-3 mb-4 font-mono">
-                        <h2 class="text-xs font-bold text-[#f0f6fc] uppercase tracking-wider">Доступные терминалы (Nodes)</h2>
-                        <span id="nodes-counter" class="text-[11px] bg-[#161b22] text-[#58a6ff] px-2 py-0.5 rounded border border-[#21262d]">Agt: 0</span>
+                    <div class="flex justify-between items-center border-b border-[#21262d] pb-2.5 mb-3.5">
+                        <h2 class="text-xs font-bold tracking-wider text-[#f0f6fc] uppercase font-mono">Доступные терминалы</h2>
+                        <span id="nodes-counter" class="text-[10px] bg-[#21262d] text-[#58a6ff] px-2 py-0.5 rounded-md font-mono border border-[#30363d]">Agt: 0</span>
                     </div>
-
-                    <div id="machines-container" class="space-y-2.5 max-h-[250px] overflow-y-auto pr-1">
-                        <div id="no-nodes-fallback" class="text-center py-12 text-[#7d8590] border border-dashed border-[#21262d] rounded-lg bg-[#161b22]/30 font-mono text-xs">
+                    
+                    <div id="machines-container" class="space-y-2.5 max-h-[200px] overflow-y-auto pr-1">
+                        <div id="no-nodes-fallback" class="text-center py-10 text-[#7d8590] border border-dashed border-[#21262d] rounded-xl bg-[#161b22]/30 font-mono text-xs">
                             <p>Ожидание подключений `agent.py`...</p>
-                            <p class="text-[10px] text-[#7d8590]/50 mt-1">Убедитесь, что агент запущен и подключен к серверу Railway</p>
+                            <p class="text-[9px] text-[#8b949e]/40 mt-1">Сервер Railway сканирует порты</p>
                         </div>
                     </div>
                 </div>
 
-                <button id="btn-global-disconnect" disabled class="w-full mt-6 bg-[#21262d] border border-[#30363d] text-[#7d8590] py-3 rounded-lg text-xs font-mono font-bold uppercase tracking-widest transition-all duration-200 cursor-not-allowed hover:bg-red-950/20 hover:text-red-400 hover:border-red-900/50">
-                    Разорвать все активные сессии
+                <button id="btn-global-disconnect" disabled class="w-full mt-4 bg-[#21262d] border border-[#30363d] text-[#7d8590] py-2.5 rounded-lg text-[11px] font-mono font-bold uppercase tracking-widest transition-all duration-300 cursor-not-allowed hover:bg-[#f85149]/10 hover:text-[#f85149] hover:border-[#f85149]/40">
+                    Разорвать сессию
                 </button>
             </div>
 
-            <div class="panel-node rounded-xl p-4 space-y-3 font-mono">
-                <div class="text-xs font-bold uppercase text-[#f0f6fc] border-b border-[#21262d] pb-2 flex justify-between items-center">
-                    <span>Выбор лимитов потока</span>
-                    <span class="text-[10px] text-[#58a6ff]" id="current-tariff-lbl">Тариф: Ultra</span>
+            <div class="bg-[#0d1117]/80 backdrop-blur-md border border-[#30363d] rounded-xl p-4 shadow-2xl font-mono text-xs space-y-3">
+                <div class="text-[10px] font-bold uppercase text-[#8b949e] border-b border-[#21262d] pb-2 flex justify-between items-center">
+                    <span>Сетка конфигурации лимитов</span>
+                    <span class="text-[9px] text-[#58a6ff]" id="lbl-active-tariff">Пакет: Premium</span>
                 </div>
-                <div class="grid grid-cols-3 gap-2 text-center text-xs">
-                    <div id="tf-base" class="tariff-btn border border-[#21262d] p-2 rounded-lg bg-[#161b22]/40 cursor-pointer" onclick="switchTariff('base', 'Basic')">
-                        <div class="font-bold text-[#f0f6fc]">Basic</div>
-                        <div class="text-[10px] text-[#7d8590] mt-0.5">30 FPS</div>
+                <div class="grid grid-cols-3 gap-2 text-center text-[11px]">
+                    <div id="tariff-free" class="tariff-card-item border border-[#21262d] p-2 rounded-lg bg-[#161b22]/30 cursor-pointer" onclick="selectTariff('free', 'Basic 30 FPS')">
+                        <div class="font-bold text-[#f0f6fc]">Free</div>
+                        <div class="text-[9px] text-[#7d8590] mt-0.5">30 FPS / SD</div>
                     </div>
-                    <div id="tf-ultra" class="tariff-btn border active p-2 rounded-lg bg-[#161b22]/40 cursor-pointer" onclick="switchTariff('ultra', 'Ultra')">
-                        <div class="font-bold text-[#f0f6fc]">Ultra</div>
-                        <div class="text-[10px] text-[#7d8590] mt-0.5">60 FPS</div>
+                    <div id="tariff-premium" class="tariff-card-item border selected p-2 rounded-lg bg-[#161b22]/30 cursor-pointer" onclick="selectTariff('premium', 'Premium 60 FPS')">
+                        <div class="font-bold text-[#f0f6fc]">Premium</div>
+                        <div class="text-[9px] text-[#58a6ff] mt-0.5">60 FPS / HD</div>
                     </div>
-                    <div id="tf-max" class="tariff-btn border border-[#21262d] p-2 rounded-lg bg-[#161b22]/40 cursor-pointer" onclick="switchTariff('max', 'Cluster')">
+                    <div id="tariff-cluster" class="tariff-card-item border border-[#21262d] p-2 rounded-lg bg-[#161b22]/30 cursor-pointer" onclick="selectTariff('cluster', 'Cluster 120 FPS')">
                         <div class="font-bold text-[#f0f6fc]">Cluster</div>
-                        <div class="text-[10px] text-[#7d8590] mt-0.5">120 FPS</div>
+                        <div class="text-[9px] text-[#7d8590] mt-0.5">120 FPS / 4K</div>
                     </div>
                 </div>
             </div>
 
-        </div>
+        </section>
 
-        <div class="lg:col-span-7 flex flex-col space-y-6">
-            
-            <div class="panel-node rounded-xl p-4 flex flex-col justify-between flex-grow relative overflow-hidden">
+        <section class="lg:col-span-7 flex flex-col space-y-5">
+            <div class="bg-[#0d1117]/80 backdrop-blur-md border border-[#30363d] rounded-xl p-4 shadow-2xl flex flex-col justify-between h-full relative overflow-hidden">
                 
-                <div class="flex items-center justify-between border-b border-[#21262d] pb-3 mb-3 font-mono">
+                <div class="flex items-center justify-between border-b border-[#21262d] pb-2.5 mb-2.5">
                     <div class="flex items-center space-x-2">
                         <span class="w-2 h-2 rounded-full bg-[#7d8590]" id="stream-status-dot"></span>
-                        <span class="text-xs font-bold uppercase text-[#f0f6fc]" id="stream-status-text">Экран: Pipeline IDLE</span>
+                        <span class="text-xs uppercase font-bold tracking-wider text-[#f0f6fc] font-mono" id="stream-status-text">Экран: Pipeline IDLE</span>
                     </div>
-                    <div class="flex items-center space-x-3 text-[11px] text-[#7d8590]">
+                    <div class="flex items-center space-x-3 text-[10px] font-mono text-[#7d8590]">
                         <span id="meta-fps">FPS: --</span>
                         <span id="meta-rtt">RTT: -- ms</span>
-                        <button id="btn-fullscreen" class="text-[#58a6ff] hover:text-[#79c0ff] cursor-pointer bg-[#161b22] px-2 py-0.5 rounded border border-[#21262d] text-[10px] uppercase">
-                            [ Fullscreen ]
+                        <button id="btn-fullscreen" class="text-[#58a6ff] hover:text-[#79c0ff] cursor-pointer bg-[#161b22] px-2 py-0.5 rounded border border-[#21262d] uppercase text-[9px]">
+                            [ FULLSCREEN ]
                         </button>
                     </div>
                 </div>
 
-                <div id="video-container-box" class="relative bg-[#010409] border border-[#21262d] rounded-lg overflow-hidden flex items-center justify-center min-h-[400px] lg:min-h-[490px] aspect-video group">
+                <div id="video-container-box" class="relative bg-[#010409] border border-[#21262d] rounded-lg overflow-hidden flex items-center justify-center min-h-[380px] lg:min-h-[440px] aspect-video group">
                     
                     <video id="game-video-element" autoplay playsinline class="w-full h-full object-contain z-10 hidden cursor-none"></video>
                     
-                    <div id="custom-stream-cursor" class="absolute w-4 h-4 pointer-events-none z-50 hidden transition-transform duration-75">
-                        <svg viewBox="0 0 24 24" class="w-full h-full fill-[#58a6ff] drop-shadow-[0_0_4px_rgba(88,166,255,0.6)]">
+                    <div id="custom-stream-cursor" class="absolute w-3.5 h-3.5 pointer-events-none z-50 hidden transition-transform duration-75">
+                        <svg viewBox="0 0 24 24" class="w-full h-full fill-[#58a6ff] drop-shadow-[0_0_4px_rgba(88,166,255,0.7)]">
                             <path d="M4.5 3V19.5L9.75 14.25H18.75L4.5 3Z" stroke="white" stroke-width="1.5" stroke-linejoin="round"/>
                         </svg>
                     </div>
 
                     <div id="video-placeholder" class="absolute inset-0 flex flex-col items-center justify-center text-center p-6 space-y-3 z-0 transition-all duration-300">
-                        <div class="p-3.5 bg-[#161b22] border border-[#30363d] rounded-full text-[#30363d] transition-all">
+                        <div class="p-3.5 bg-[#161b22] border border-[#30363d] rounded-full text-[#30363d]">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z" />
                             </svg>
                         </div>
                         <div class="space-y-0.5">
-                            <p class="text-xs font-bold text-[#f0f6fc] font-mono uppercase tracking-wider">Сигнальный тракт пуст</p>
-                            <p class="text-[11px] text-[#7d8590] max-w-xs mx-auto font-mono">Выберите активный хост из списка слева и отправьте сетевой запрос `Offer` для трансляции</p>
+                            <p class="text-xs font-bold tracking-wide text-[#f0f6fc] font-mono uppercase">Сигнальный тракт пуст</p>
+                            <p class="text-[11px] text-[#7d8590] max-w-xs mx-auto">Выберите активный хост из списка слева и отправьте сетевой запрос `Offer` для трансляции</p>
                         </div>
                     </div>
 
                 </div>
 
-                <div class="mt-3 pt-3 border-t border-[#21262d] flex justify-between items-center text-[10px] text-[#7d8590] font-mono">
+                <div class="mt-2.5 pt-2.5 border-t border-[#21262d] flex justify-between items-center text-[9px] text-[#7d8590] font-mono">
                     <span>CONTROL: MOUSE & KEYBOARD HOVER CAPTURE</span>
-                    <span>PROTO: WebRTC BUFFER</span>
+                    <span>PROTO: WebRTC (H.264 / VP8)</span>
                 </div>
 
             </div>
 
-            <div class="panel-node rounded-xl p-4 font-mono text-xs flex flex-col h-[170px]">
+            <div class="bg-[#0d1117]/90 border border-[#30363d] rounded-xl p-4 shadow-2xl font-mono text-xs flex flex-col h-[150px]">
                 <div class="flex items-center justify-between border-b border-[#21262d] pb-2 mb-2 text-[#8b949e] text-[10px]">
-                    <span class="uppercase tracking-wider font-bold text-[#58a6ff]">System Terminal Logs</span>
+                    <span class="uppercase tracking-wider font-bold text-[#79c0ff]">System Terminal Logs</span>
                     <span class="text-[9px] bg-[#161b22] px-1.5 py-0.5 rounded border border-[#21262d]">WSS CONTEXT</span>
                 </div>
-                <div id="terminal-logs" class="flex-grow overflow-y-auto space-y-1 pr-1 text-[11px] leading-relaxed text-[#8b949e]">
-                    <div>[SYSTEM] Инициализация ядра веб-интерфейса...</div>
-                    <div>[SYSTEM] Проверка сигнальных шлюзов STUN... OK</div>
-                    <div>[SYSTEM] Ожидание команды на линк...</div>
+                <div id="terminal-logs" class="flex-grow overflow-y-auto space-y-1 pr-1 text-[11px] leading-relaxed">
+                    <div class="text-[#8b949e]">[SYSTEM] Инициализация ядра веб-интерфейса...</div>
+                    <div class="text-[#8b949e]">[SYSTEM] Ожидание команды на линк...</div>
                 </div>
             </div>
 
-        </div>
+        </section>
     </main>
 
-    <footer class="w-full max-w-7xl mx-auto z-10 mt-6 pt-4 border-t border-[#21262d] flex flex-col sm:flex-row justify-between items-center text-[10px] font-mono text-[#7d8590] space-y-2 sm:space-y-0">
+    <footer class="w-full max-w-7xl mx-auto z-10 mt-5 pt-4 border-t border-[#21262d] flex flex-col sm:flex-row justify-between items-center text-[10px] font-mono text-[#7d8590] space-y-2 sm:space-y-0">
         <div>CLOUDNET INFRASTRUCTURE // DESIGNED FOR MULTI-NODE RENDERING API</div>
         <div class="flex items-center space-x-3">
             <span class="flex items-center"><span class="w-1.5 h-1.5 bg-[#56d364] rounded-full mr-1.5 animate-ping"></span>SECURE WAN LINK</span>
@@ -256,6 +244,7 @@
         const htmlCustomCursor = document.getElementById('custom-stream-cursor');
         const htmlFullscreenBtn = document.getElementById('btn-fullscreen');
         const htmlVideoContainerBox = document.getElementById('video-container-box');
+        const htmlVerifyPayBtn = document.getElementById('btn-verify-pay');
         
         const htmlMetaFps = document.getElementById('meta-fps');
         const htmlMetaRtt = document.getElementById('meta-rtt');
@@ -265,31 +254,51 @@
         let rtcDataChannel = null;
         let activeTargetMachineId = null;
         let fpsIntervalId = null;
-        let sessionStartTime = null;
-        let sessionTimerId = null;
+
+        // Пул реальных генерируемых аккаунтов на сессию
+        const fallbackUsernames = ['root_operator', 'admin_node_1', 'pipeline_manager_x', 'net_supervisor'];
+        const randomUser = fallbackUsernames[Math.floor(Math.random() * fallbackUsernames.length)];
+        document.getElementById('acc-username').innerText = `${randomUser}@cloudnet`;
+        document.getElementById('acc-uid').innerText = Math.floor(Math.random() * 9000 + 1000) + "-X" + Math.floor(Math.random() * 80 + 10);
 
         function pushTerminalLog(tag, message, colorClass = "text-[#8b949e]") {
             const time = new Date().toLocaleTimeString();
             const logRow = document.createElement('div');
-            logRow.className = colorClass;
+            logRow.className = `fade-in-card ${colorClass}`;
             logRow.innerHTML = `<span class="text-[#7d8590]">[${time}]</span> <span class="font-bold">[${tag}]</span> -> ${message}`;
             htmlTerminalLogs.appendChild(logRow);
             htmlTerminalLogs.scrollTop = htmlTerminalLogs.scrollHeight;
         }
 
-        function switchTariff(id, title) {
-            document.querySelectorAll('.tariff-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(`tf-${id}`).classList.add('active');
-            document.getElementById('current-tariff-lbl').innerText = `Тариф: ${title}`;
-            pushTerminalLog("HUD", `Изменен лимит кадров под сетку тарифа: ${title.toUpperCase()}`, "text-[#58a6ff]");
+        // Логика выбора тарифов
+        function selectTariff(tariffId, labelText) {
+            document.querySelectorAll('.tariff-card-item').forEach(el => el.classList.remove('selected'));
+            document.getElementById(`tariff-${tariffId}`).classList.add('selected');
+            document.getElementById('lbl-active-tariff').innerText = `Пакет: ${labelText}`;
+            pushTerminalLog("TARIFF", `Конфигурация изменена: установлен пресет ${labelText}`, "text-[#58a6ff]");
         }
 
+        // Фейк проверка оплаты
+        htmlVerifyPayBtn.onclick = () => {
+            htmlVerifyPayBtn.disabled = true;
+            htmlVerifyPayBtn.innerText = "ПРОВЕРКА...";
+            pushTerminalLog("BILLING", "Запрос к шлюзу транзакций API...", "text-[#7d8590]");
+            
+            setTimeout(() => {
+                const mockHash = Math.random().toString(16).substr(2, 8).toUpperCase();
+                pushTerminalLog("BILLING", `Транзакция TX-${mockHash} подтверждена. Баланс обновлен.`, "text-[#56d364]");
+                document.getElementById('acc-balance').innerText = (parseFloat(document.getElementById('acc-balance').innerText.replace(/[^0-9.]/g, '')) + 50).toFixed(2) + " $";
+                htmlVerifyPayBtn.disabled = false;
+                htmlVerifyPayBtn.innerText = "ПРОВЕРИТЬ ОПЛАТУ";
+            }, 1500);
+        };
+
         function connectToSignalingCluster() {
-            pushTerminalLog("CORE", "Установка соединения с Railway сервером...", "text-[#58a6ff]");
+            pushTerminalLog("CORE", "Подключение к облачному сигнальному серверу Railway...", "text-[#79c0ff]");
             socketSignaling = new WebSocket(SIGNALING_SERVER_URL);
 
             socketSignaling.onopen = () => {
-                pushTerminalLog("CORE", "Успешный линк с Railway. Запрос списка нод...", "text-[#56d364]");
+                pushTerminalLog("CORE", "Успешный линк с Railway. Запрос пула хостов...", "text-[#56d364]");
                 socketSignaling.send(JSON.stringify({ type: 'get_machines', sender: 'client' }));
             };
 
@@ -298,16 +307,16 @@
                 if (data.type === 'machines_list') {
                     renderMachinesPool(data.list);
                 } else if (data.type === 'answer') {
-                    pushTerminalLog("RTC", "Получен удаленный SDP Answer. Установка дескрипторов...");
+                    pushTerminalLog("RTC", "Получен удаленный SDP Answer. Установка хэндшейка...");
                     if (rtcPeerConnection) {
                         await rtcPeerConnection.setRemoteDescription(new RTCSessionDescription({ sdp: data.sdp, type: 'answer' }));
-                        pushTerminalLog("RTC", "Соединение успешно зафиксировано!", "text-[#56d364]");
+                        pushTerminalLog("RTC", "Remote Description установлен успешно!", "text-[#56d364]");
                     }
                 }
             };
 
             socketSignaling.onclose = () => {
-                pushTerminalLog("CRIT", "Соединение потеряно. Реконнект через 4 секунды...", "text-[#f85149]");
+                pushTerminalLog("CRIT", "Соединение с Railway потеряно. Реконнект через 4 секунды...", "text-[#f85149]");
                 setTimeout(connectToSignalingCluster, 4000);
             };
         }
@@ -324,17 +333,17 @@
             machines.forEach(node => {
                 const isCurrentActive = activeTargetMachineId === node.id;
                 const card = document.createElement('div');
-                card.className = `flex items-center justify-between p-3 bg-[#161b22]/50 rounded-lg border ${isCurrentActive ? 'border-[#58a6ff] bg-[#58a6ff]/5' : 'border-[#21262d]'} hover:border-[#30363d] transition-all`;
+                card.className = `fade-in-card flex items-center justify-between p-3 bg-[#161b22]/60 rounded-xl border ${isCurrentActive ? 'border-[#58a6ff] bg-[#58a6ff]/5' : 'border-[#21262d]'} hover:border-[#30363d] transition-all`;
                 
                 card.innerHTML = `
-                    <div class="flex items-center space-x-3">
-                        <div class="w-2 h-2 rounded-full bg-[#56d364] pulse-dot"></div>
-                        <div class="font-mono">
-                            <p class="text-xs font-bold text-[#f0f6fc] uppercase">${node.username}</p>
-                            <p class="text-[10px] text-[#7d8590]">${node.id}</p>
+                    <div class="flex items-center space-x-2.5">
+                        <div class="w-2 h-2 rounded-full bg-[#56d364] pulse-fast text-[#56d364]"></div>
+                        <div>
+                            <p class="text-xs font-bold text-[#f0f6fc] font-mono tracking-wide uppercase">${node.username}</p>
+                            <p class="text-[10px] text-[#7d8590] font-mono">${node.id}</p>
                         </div>
                     </div>
-                    <button class="px-3 py-1.5 text-[10px] font-mono font-bold uppercase rounded border transition-all ${isCurrentActive ? 'bg-[#f85149]/10 border-[#f85149]/30 text-[#f85149] hover:bg-[#f85149] hover:text-white' : 'bg-[#21262d] border-[#30363d] text-[#c9d1d9] hover:bg-[#58a6ff] hover:text-white hover:border-[#58a6ff]'}" 
+                    <button class="px-3 py-1.5 text-[10px] font-mono font-bold uppercase rounded-lg border transition-all ${isCurrentActive ? 'bg-[#f85149]/10 border-[#f85149]/30 text-[#f85149] hover:bg-[#f85149] hover:text-white' : 'bg-[#21262d] border-[#30363d] text-[#c9d1d9] hover:bg-[#58a6ff] hover:text-white hover:border-[#58a6ff]'}" 
                         onclick="toggleNodeConnection('${node.id}', '${node.username}')">
                         ${isCurrentActive ? 'Disconnect' : 'Connect'}
                     </button>
@@ -351,7 +360,7 @@
 
             if (activeTargetMachineId) disconnectActiveSession();
             activeTargetMachineId = machineId;
-            pushTerminalLog("RTC", `Подключение к хосту: [${username}]...`, "text-[#58a6ff]");
+            pushTerminalLog("RTC", `Инициализация коннекта к хосту: [${username}]...`, "text-[#79c0ff]");
 
             rtcPeerConnection = new RTCPeerConnection({
                 iceServers: [
@@ -360,36 +369,35 @@
                 ]
             });
 
-            // БАГ-ФИКС: Инициализация канала ввода строго до создания оффера
+            // Открываем DataChannel строго до создания оффера
             rtcDataChannel = rtcPeerConnection.createDataChannel("mouse_keyboard_input");
             
             rtcDataChannel.onopen = () => {
-                pushTerminalLog("DATA", "Канал ввода Input DataChannel успешно открыт.", "text-[#56d364]");
+                pushTerminalLog("DATA", "Канал ввода Input (DataChannel) зафиксирован.", "text-[#56d364]");
                 bindInputCapturers();
             };
 
             rtcPeerConnection.ontrack = (event) => {
-                pushTerminalLog("STREAM", "Медиапоток захвачен!", "text-[#56d364]");
+                pushTerminalLog("STREAM", "Канал захвата кадров соединен!", "text-[#56d364]");
                 htmlVideoElement.srcObject = event.streams[0];
                 
                 htmlVideoPlaceholder.classList.add('opacity-0');
                 setTimeout(() => {
                     htmlVideoPlaceholder.classList.add('hidden');
                     htmlVideoElement.classList.remove('hidden');
-                    htmlVideoElement.classList.add('block');
+                    htmlVideoElement.classList.add('block', 'fade-in-card');
                     htmlCustomCursor.classList.remove('hidden');
                     htmlCustomCursor.classList.add('block');
                 }, 200);
 
-                htmlStreamStatusDot.className = "w-2 h-2 rounded-full bg-[#56d364] pulse-dot";
-                htmlStreamStatusText.innerText = `Экран LIVE // HOST: ${username.toUpperCase()}`;
+                htmlStreamStatusDot.className = "w-2 h-2 rounded-full bg-[#56d364] pulse-fast text-[#56d364]";
+                htmlStreamStatusText.innerText = `Экран LIVE // PIPELINE ADDR: ${username.toUpperCase()}`;
                 
                 htmlGlobalDisconnect.disabled = false;
                 htmlGlobalDisconnect.classList.remove('bg-[#21262d]', 'text-[#7d8590]', 'cursor-not-allowed');
                 htmlGlobalDisconnect.classList.add('bg-[#161b22]', 'text-[#f85149]', 'border-[#f85149]/30', 'cursor-pointer');
 
                 startPerformanceMonitor();
-                startSessionTimer();
             };
 
             rtcPeerConnection.addTransceiver("video", { direction: "recvonly" });
@@ -409,10 +417,9 @@
 
         function disconnectActiveSession() {
             if (!activeTargetMachineId) return;
-            pushTerminalLog("CORE", "Закрытие сессии стриминга...", "text-[#f85149]");
+            pushTerminalLog("CORE", "Разрыв текущей активной сессии...", "text-[#f85149]");
             
             if (fpsIntervalId) clearInterval(fpsIntervalId);
-            if (sessionTimerId) clearInterval(sessionTimerId);
             if (rtcDataChannel) rtcDataChannel.close();
             if (rtcPeerConnection) rtcPeerConnection.close();
 
@@ -434,17 +441,13 @@
             
             htmlMetaFps.innerText = "FPS: --";
             htmlMetaRtt.innerText = "RTT: -- ms";
-            document.getElementById('meta-session-time').innerText = "Session: 00:00:00";
 
             htmlGlobalDisconnect.disabled = true;
-            htmlGlobalDisconnect.className = "w-full mt-6 bg-[#21262d] border border-[#30363d] text-[#7d8590] py-3 rounded-lg text-xs font-mono font-bold uppercase tracking-widest transition-all duration-200 cursor-not-allowed hover:bg-red-950/20 hover:text-red-400 hover:border-red-500/30";
+            htmlGlobalDisconnect.className = "w-full mt-4 bg-[#21262d] border border-[#30363d] text-[#7d8590] py-2.5 rounded-lg text-[11px] font-mono font-bold uppercase tracking-widest transition-all duration-300 cursor-not-allowed hover:bg-[#f85149]/10 hover:text-[#f85149] hover:border-[#f85149]/40";
 
             socketSignaling.send(JSON.stringify({ type: 'get_machines', sender: 'client' }));
         }
 
-        htmlGlobalDisconnect.onclick = () => disconnectActiveSession();
-
-        // БАГ-ФИКС: Высокоточный расчет координат относительно элемента
         function bindInputCapturers() {
             if (!htmlVideoElement) return;
 
@@ -515,18 +518,6 @@
             }, 1000);
         }
 
-        function startSessionTimer() {
-            if (sessionTimerId) clearInterval(sessionTimerId);
-            sessionStartTime = Date.now();
-            sessionTimerId = setInterval(() => {
-                const diff = Date.now() - sessionStartTime;
-                const secs = Math.floor((diff / 1000) % 60).toString().padStart(2, '0');
-                const mins = Math.floor((diff / (1000 * 60)) % 60).toString().padStart(2, '0');
-                const hrs = Math.floor((diff / (1000 * 60 * 60)) % 24).toString().padStart(2, '0');
-                document.getElementById('meta-session-time').innerText = `Session: ${hrs}:${mins}:${secs}`;
-            }, 1000);
-        }
-
         htmlFullscreenBtn.onclick = () => {
             if (!document.fullscreenElement) {
                 htmlVideoContainerBox.requestFullscreen().catch(() => {});
@@ -535,7 +526,6 @@
             }
         };
 
-        // Старт
         connectToSignalingCluster();
     </script>
 </body>
