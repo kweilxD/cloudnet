@@ -154,10 +154,13 @@
                     <div class="flex items-center space-x-4 text-[10px] font-mono text-[#7d8590]">
                         <span id="meta-fps">FPS: --</span>
                         <span id="meta-rtt">RTT: -- ms</span>
+                        <button id="btn-fullscreen" class="text-[#58a6ff] hover:text-[#79c0ff] cursor-pointer">
+                            [ FULLSCREEN ]
+                        </button>
                     </div>
                 </div>
 
-                <div class="video-container relative bg-[#010409] border border-[#21262d] rounded-lg overflow-hidden flex items-center justify-center min-h-[400px] lg:min-h-[500px] aspect-video group">
+                <div id="video-container-box" class="video-container relative bg-[#010409] border border-[#21262d] rounded-lg overflow-hidden flex items-center justify-center min-h-[400px] lg:min-h-[500px] aspect-video group">
                     
                     <video id="game-video-element" autoplay playsinline class="w-full h-full object-contain z-10 hidden cursor-none"></video>
                     
@@ -200,12 +203,9 @@
     </footer>
 
     <script>
-        // --- КОНФИГУРАЦИЯ СЕРВЕРА RAILWAY ---
-        // Вставь сюда свой сгенерированный домен из личного кабинета Railway (без http://, просто домен)
         const RAILWAY_DOMAIN = "cloudnet-core-production.up.railway.app"; 
         const SIGNALING_SERVER_URL = `wss://${RAILWAY_DOMAIN}`;
 
-        // Селекторы DOM дерева
         const htmlMachinesContainer = document.getElementById('machines-container');
         const htmlNoNodesFallback = document.getElementById('no-nodes-fallback');
         const htmlNodesCounter = document.getElementById('nodes-counter');
@@ -216,18 +216,18 @@
         const htmlStreamStatusDot = document.getElementById('stream-status-dot');
         const htmlStreamStatusText = document.getElementById('stream-status-text');
         const htmlCustomCursor = document.getElementById('custom-stream-cursor');
+        const htmlFullscreenBtn = document.getElementById('btn-fullscreen');
+        const htmlVideoContainerBox = document.getElementById('video-container-box');
         
         const htmlMetaFps = document.getElementById('meta-fps');
         const htmlMetaRtt = document.getElementById('meta-rtt');
 
-        // WebRTC и сигнальные стейты сессии
         let socketSignaling = null;
         let rtcPeerConnection = null;
         let rtcDataChannel = null;
         let activeTargetMachineId = null;
         let fpsIntervalId = null;
 
-        // Логгер для стильного киберпанк терминала
         function pushTerminalLog(tag, message, colorClass = "text-[#8b949e]") {
             const time = new Date().toLocaleTimeString();
             const logRow = document.createElement('div');
@@ -237,27 +237,20 @@
             htmlTerminalLogs.scrollTop = htmlTerminalLogs.scrollHeight;
         }
 
-        // --- ИНИЦИАЛИЗАЦИЯ И ПОДКЛЮЧЕНИЕ К RAILWAY ---
         function connectToSignalingCluster() {
             pushTerminalLog("CORE", "Подключение к облачному сигнальному серверу Railway...", "text-[#79c0ff]");
-            
             socketSignaling = new WebSocket(SIGNALING_SERVER_URL);
 
             socketSignaling.onopen = () => {
                 pushTerminalLog("CORE", "Успешный линк с Railway. Запрос пула хостов...", "text-[#56d364]");
-                // Запрашиваем список ПК у сервера
                 socketSignaling.send(JSON.stringify({ type: 'get_machines', sender: 'client' }));
             };
 
             socketSignaling.onmessage = async (event) => {
                 const data = JSON.parse(event.data);
-
-                // Слушаем входящий список машин
                 if (data.type === 'machines_list') {
                     renderMachinesPool(data.list);
-                } 
-                // Слушаем ответ SDP Answer от агента через сервер
-                else if (data.type === 'answer') {
+                } else if (data.type === 'answer') {
                     pushTerminalLog("RTC", "Получен удаленный SDP Answer. Установка хэндшейка...");
                     if (rtcPeerConnection) {
                         await rtcPeerConnection.setRemoteDescription(new RTCSessionDescription({ sdp: data.sdp, type: 'answer' }));
@@ -271,12 +264,11 @@
                 setTimeout(connectToSignalingCluster, 4000);
             };
 
-            socketSignaling.onerror = (err) => {
+            socketSignaling.onerror = () => {
                 pushTerminalLog("ERR", "Ошибка сокет-канала маршрутизации.", "text-[#f85149]");
             };
         }
 
-        // --- ОТРИСОВКА ПУЛА АГЕНТОВ (МАШИН) ---
         function renderMachinesPool(machines) {
             htmlMachinesContainer.innerHTML = '';
             htmlNodesCounter.innerText = `Agt: ${machines.length}`;
@@ -288,7 +280,6 @@
 
             machines.forEach(node => {
                 const isCurrentActive = activeTargetMachineId === node.id;
-                
                 const card = document.createElement('div');
                 card.className = `fade-in-card flex items-center justify-between p-4 bg-[#161b22]/60 rounded-xl border ${isCurrentActive ? 'border-[#58a6ff] bg-[#58a6ff]/5 shadow-[0_0_15px_rgba(88,166,255,0.1)]' : 'border-[#21262d]'} hover:border-[#30363d] transition-all duration-300`;
                 
@@ -309,21 +300,16 @@
             });
         }
 
-        // --- УПРАВЛЕНИЕ ЛИНКОМ С АГЕНТОМ (CONNECT / DISCONNECT) ---
         async function toggleNodeConnection(machineId, username) {
             if (activeTargetMachineId === machineId) {
-                // Если кликнули по подключенной ноде — отключаем её
                 disconnectActiveSession();
                 return;
             }
 
-            // Если уже что-то запущено — сначала глушим старую сессию
             if (activeTargetMachineId) disconnectActiveSession();
-
             activeTargetMachineId = machineId;
             pushTerminalLog("RTC", `Инициализация коннекта к хосту: [${username}]...`, "text-[#79c0ff]");
 
-            // Конфигурируем WebRTC Peer
             rtcPeerConnection = new RTCPeerConnection({
                 iceServers: [
                     { urls: 'stun:stun.l.google.com:19302' },
@@ -331,24 +317,18 @@
                 ]
             });
 
-            // БАГ-ФИКС №1: Создаем Канал Данных СТРОГО до создания Offer
+            // Открываем DataChannel строго до создания оффера
             rtcDataChannel = rtcPeerConnection.createDataChannel("mouse_keyboard_input");
             
             rtcDataChannel.onopen = () => {
                 pushTerminalLog("DATA", "Выделенный канал ввода Input (DataChannel) открыт.", "text-[#56d364]");
-                bindInputCapturers(); // Активируем мышь и клаву
-            };
-            
-            rtcDataChannel.onclose = () => {
-                pushTerminalLog("DATA", "Канал ввода Input закрыт.");
+                bindInputCapturers();
             };
 
-            // Отлавливаем входящий видеопоток
             rtcPeerConnection.ontrack = (event) => {
                 pushTerminalLog("STREAM", "Канал захвата кадров видеокарты соединен!", "text-[#56d364]");
                 htmlVideoElement.srcObject = event.streams[0];
                 
-                // Красиво переключаем интерфейс с анимацией
                 htmlVideoPlaceholder.classList.add('opacity-0', 'scale-95');
                 setTimeout(() => {
                     htmlVideoPlaceholder.classList.add('hidden');
@@ -358,7 +338,6 @@
                     htmlCustomCursor.classList.add('block');
                 }, 300);
 
-                // Обновляем статусбары монитора
                 htmlStreamStatusDot.className = "w-2 h-2 rounded-full bg-[#56d364] pulse-fast text-[#56d364]";
                 htmlStreamStatusText.innerText = `Экран LIVE // PIPELINE ADDR: ${username.toUpperCase()}`;
                 
@@ -369,14 +348,11 @@
                 startPerformanceMonitor();
             };
 
-            // Создаем SDP видео-ресивер
             rtcPeerConnection.addTransceiver("video", { direction: "recvonly" });
 
-            // Генерируем локальный Offer
             const offer = await rtcPeerConnection.createOffer();
             await rtcPeerConnection.setLocalDescription(offer);
 
-            // Отправляем на Railway для пересылки агенту
             socketSignaling.send(JSON.stringify({
                 type: 'offer',
                 sdp: rtcPeerConnection.localDescription.sdp,
@@ -385,14 +361,11 @@
             }));
 
             pushTerminalLog("SIGNAL", "Сетевой пакет `SDP Offer` транслирован на Railway.");
-            // Перерисовываем список чтобы кнопка сменилась на Disconnect
             socketSignaling.send(JSON.stringify({ type: 'get_machines', sender: 'client' }));
         }
 
-        // Функция закрытия текущего активного стрима
         function disconnectActiveSession() {
             if (!activeTargetMachineId) return;
-
             pushTerminalLog("CORE", "Разрыв текущей активной стрим-сессии...", "text-[#f85149]");
             
             if (fpsIntervalId) clearInterval(fpsIntervalId);
@@ -403,7 +376,6 @@
             rtcDataChannel = null;
             activeTargetMachineId = null;
 
-            // Возвращаем дефолтный визуал плеера обратно
             htmlVideoElement.classList.add('hidden');
             htmlVideoElement.classList.remove('block');
             htmlVideoElement.srcObject = null;
@@ -425,31 +397,23 @@
             htmlGlobalDisconnect.disabled = true;
             htmlGlobalDisconnect.className = "w-full mt-6 bg-[#21262d] border border-[#30363d] text-[#7d8590] py-3 rounded-lg text-xs font-bold uppercase tracking-widest transition-all duration-300 cursor-not-allowed hover:bg-[#f85149]/10 hover:text-[#f85149] hover:border-[#f85149]/40";
 
-            // Обновляем списки интерфейса
             socketSignaling.send(JSON.stringify({ type: 'get_machines', sender: 'client' }));
         }
 
-        // Нажатие на большую нижнюю кнопку сброса
         htmlGlobalDisconnect.onclick = () => disconnectActiveSession();
 
-        // --- БАГ-ФИКС №2: ИДЕАЛЬНЫЙ ТРАКТ ЗАХВАТА ВВОДА (МЫШЬ + КЛАВИАТУРА) ---
         function bindInputCapturers() {
             if (!htmlVideoElement) return;
 
-            // Отслеживание перемещения мыши с учетом масштабирования видео-контейнера
             htmlVideoElement.addEventListener('mousemove', (event) => {
                 if (rtcDataChannel && rtcDataChannel.readyState === 'open') {
                     const rect = htmlVideoElement.getBoundingClientRect();
-                    
-                    // БАГ-ФИКС: Рассчитываем точные относительные координаты внутри видеоструктуры (0.0 - 1.0)
                     const percentX = (event.clientX - rect.left) / rect.width;
                     const percentY = (event.clientY - rect.top) / rect.height;
 
-                    // Двигаем кастомный CSS-курсор вслед за системным
                     htmlCustomCursor.style.left = `${event.clientX - rect.left}px`;
                     htmlCustomCursor.style.top = `${event.clientY - rect.top}px`;
 
-                    // Пакуем и шлем бинарную строку в дата-канал
                     rtcDataChannel.send(JSON.stringify({
                         type: 'mousemove',
                         x: percentX,
@@ -458,33 +422,24 @@
                 }
             });
 
-            // Клики кнопок мыши
             const handleMouseClicks = (actionType, eventButton) => {
                 if (rtcDataChannel && rtcDataChannel.readyState === 'open') {
-                    // JavaScript: 0 = Левая, 2 = Правая. Агент на Python ждет строки 'left'/'right'
                     const targetBtn = eventButton === 2 ? 'right' : 'left';
-                    rtcDataChannel.send(JSON.stringify({
-                        type: actionType,
-                        button: targetBtn
-                    }));
+                    rtcDataChannel.send(JSON.stringify({ type: actionType, button: targetBtn }));
                 }
             };
 
             htmlVideoElement.addEventListener('mousedown', (e) => handleMouseClicks('mousedown', e.button));
             htmlVideoElement.addEventListener('mouseup', (e) => handleMouseClicks('mouseup', e.button));
-            
-            // Запрещаем дефолтное контекстное меню Windows на плеере, чтобы работал правый клик в Windows играх
             htmlVideoElement.addEventListener('contextmenu', e => e.preventDefault());
 
-            // Захват клавиатуры (Слушаем всё окно WINDOW, но фильтруем фокус ввода на бади)
             const handleKeyboardInject = (actionType, eventContext) => {
                 if (rtcDataChannel && rtcDataChannel.readyState === 'open' && document.activeElement === document.body) {
-                    if (eventContext.key === "Escape") return; // Оставляем Esc для выхода из фуллскрина браузера
-                    
-                    eventContext.preventDefault(); // Блокируем системные горячие клавиши браузера (Tab, Alt, F5)
+                    if (eventContext.key === "Escape") return;
+                    eventContext.preventDefault();
                     rtcDataChannel.send(JSON.stringify({
                         type: actionType,
-                        key: eventContext.key.toLowerCase() // Переводим в нижний регистр для pydirectinput
+                        key: eventContext.key.toLowerCase()
                     }));
                 }
             };
@@ -493,25 +448,20 @@
             window.addEventListener('keyup', (e) => handleKeyboardInject('keyup', e));
         }
 
-        // --- МОНИТОРИНГ PERFORMANCE-СТАТИСТИКИ (FPS / RTT ТУННЕЛЯ) ---
         function startPerformanceMonitor() {
             if (fpsIntervalId) clearInterval(fpsIntervalId);
-
             let totalFramesPrev = 0;
             
             fpsIntervalId = setInterval(async () => {
                 if (!rtcPeerConnection) return;
-                
                 const stats = await rtcPeerConnection.getStats();
                 stats.forEach(report => {
-                    // Парсим WebRTC Inbound видеопоток
                     if (report.type === 'inbound-rtp' && report.kind === 'video') {
                         const framesNow = report.framesDecoded;
                         const calculatedFps = framesNow - totalFramesPrev;
                         totalFramesPrev = framesNow;
                         htmlMetaFps.innerText = `FPS: ${calculatedFps > 0 ? calculatedFps : 0}`;
                     }
-                    // Расчет задержки (Round Trip Time) сигнала через сервера Railway
                     if (report.type === 'candidate-pair' && report.state === 'succeeded') {
                         const rttTime = report.currentRoundTripTime;
                         if (rttTime !== undefined) {
@@ -522,7 +472,17 @@
             }, 1000);
         }
 
-        // Точка входа: запускаем цикл подключения
+        // Логика Полноэкранного Режима
+        htmlFullscreenBtn.onclick = () => {
+            if (!document.fullscreenElement) {
+                htmlVideoContainerBox.requestFullscreen().catch(err => {
+                    pushTerminalLog("ERR", "Не удалось перейти в полноэкранный режим.");
+                });
+            } else {
+                document.exitFullscreen();
+            }
+        };
+
         connectToSignalingCluster();
     </script>
 </body>
