@@ -1,570 +1,529 @@
 <!DOCTYPE html>
-<html lang="ru" class="scroll-smooth">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CloudNET — Cyber Premium Platform</title>
+    <title>CloudNET // Global Pipeline System</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-    <script src="https://unpkg.com/lucide@latest"></script>
-    
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@700&family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
-        
-        html, body { 
-            background-color: #02040a !important; 
-            color: #f8fafc !important;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            margin: 0; padding: 0; min-height: 100vh;
+        body {
+            font-family: 'Share Tech Mono', monospace;
+            background-color: #010409;
             overflow-x: hidden;
         }
-        
-        .font-display { font-family: 'Space Grotesk', sans-serif; }
-        
-        .glass-panel { 
-            backdrop-filter: blur(24px); 
-            background: rgba(8, 12, 24, 0.8); 
-            border: 1px solid rgba(56, 189, 248, 0.2); 
-            box-shadow: 0 0 35px -10px rgba(56, 189, 248, 0.15);
-            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        .header-title {
+            font-family: 'Orbitron', sans-serif;
+            text-shadow: 0 0 10px rgba(88, 166, 255, 0.5);
         }
-        .glass-panel:hover {
-            border-color: rgba(56, 189, 248, 0.4);
-            box-shadow: 0 0 45px -5px rgba(56, 189, 248, 0.25), 0 20px 40px -15px rgba(0,0,0,0.7);
+        /* Анимированная сетка на фоне */
+        .bg-grid {
+            background-size: 40px 40px;
+            background-image: 
+                linear-gradient(to right, rgba(212, 212, 212, 0.015) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(212, 212, 212, 0.015) 1px, transparent 1px);
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: 0;
+            animation: gridMove 20s linear infinite;
         }
-        
-        .neon-glow-cyan { box-shadow: 0 0 50px -2px rgba(56, 189, 248, 0.45); }
-        .neon-glow-purple { box-shadow: 0 0 50px -2px rgba(168, 85, 247, 0.4); }
-        .neon-text-glow { text-shadow: 0 0 25px rgba(56, 189, 248, 0.6); }
-        
-        .scanline-effect::after {
-            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(to bottom, transparent 50%, rgba(56, 189, 248, 0.02) 50%);
-            background-size: 100% 4px; pointer-events: none;
+        @keyframes gridMove {
+            0% { background-position: 0 0; }
+            100% { background-position: 40px 40px; }
         }
-
-        .modal-animate {
-            animation: modalFadeIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        /* Свечение для активных элементов */
+        .glow-border-blue {
+            box-shadow: 0 0 15px rgba(56, 139, 253, 0.2);
+            border: 1px solid rgba(56, 139, 253, 0.4);
+            transition: all 0.3s ease;
         }
-        @keyframes modalFadeIn {
-            from { opacity: 0; transform: scale(0.92) translateY(15px); filter: blur(4px); }
-            to { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
+        .glow-border-blue:hover {
+            box-shadow: 0 0 25px rgba(56, 139, 253, 0.45);
+            border: 1px solid rgba(56, 139, 253, 0.8);
         }
-
-        .slide-out-blur {
-            animation: slideOutBlurAnim 0.7s cubic-bezier(0.76, 0, 0.24, 1) forwards;
+        .glow-border-red {
+            box-shadow: 0 0 15px rgba(248, 81, 73, 0.2);
+            border: 1px solid rgba(248, 81, 73, 0.4);
         }
-        @keyframes slideOutBlurAnim {
-            0% { transform: translateX(0) scale(1); filter: blur(0) contrast(1); opacity: 1; }
-            40% { filter: blur(12px) horizontal-blur(20px) contrast(1.2); }
-            100% { transform: translateX(120%); filter: blur(30px) contrast(1.5); opacity: 0; }
+        /* Кастомный Скроллбар */
+        ::-webkit-scrollbar {
+            width: 6px;
         }
-
-        .typing-log {
-            display: inline-block;
-            white-space: nowrap;
-            overflow: hidden;
-            border-right: 2px solid rgba(56, 189, 248, 0.75);
-            animation: typing 0.2s steps(40, end), blink-caret 0.4s step-end infinite;
+        ::-webkit-scrollbar-track {
+            background: #0d1117;
         }
-        @keyframes typing { from { width: 0 } to { width: 100% } }
-        @keyframes blink-caret { from, to { border-color: transparent } 50% { border-color: #38bdf8 } }
-
-        .cyber-terminal {
-            font-family: 'Consolas', monospace;
-            background-color: #010307;
-            border: 1px solid #131927;
+        ::-webkit-scrollbar-thumb {
+            background: #30363d;
+            border-radius: 3px;
         }
-
-        .bg-gradient-mesh {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; pointer-events: none;
-            background: radial-gradient(circle at 10% 20%, rgba(56, 189, 248, 0.1) 0%, transparent 40%), radial-gradient(circle at 90% 80%, rgba(168, 85, 247, 0.08) 0%, transparent 45%);
-            filter: blur(60px); animation: meshPulse 12s ease-in-out infinite alternate;
+        ::-webkit-scrollbar-thumb:hover {
+            background: #58a6ff;
         }
-        @keyframes meshPulse { 0% { transform: scale(1); } 100% { transform: scale(1.1) translate(15px, -15px); } }
-
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #02040a; }
-        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 20px; border: 2px solid #02040a; }
-        ::-webkit-scrollbar-thumb:hover { background: #38bdf8; }
+        /* Пульсирующая анимация точки статуса */
+        .pulse-fast {
+            animation: pulseState 1.5s infinite;
+        }
+        @keyframes pulseState {
+            0% { transform: scale(0.9); opacity: 0.6; }
+            50% { transform: scale(1.1); opacity: 1; box-shadow: 0 0 10px currentColor; }
+            100% { transform: scale(0.9); opacity: 0.6; }
+        }
+        /* Плавное появление карт */
+        .fade-in-card {
+            animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        /* Эффект шума/сканирования на видео */
+        .video-container::after {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 2;
+            background-size: 100% 4px, 6px 100%;
+            pointer-events: none;
+            opacity: 0.4;
+        }
     </style>
 </head>
-<body class="flex flex-col min-h-screen">
+<body class="text-[#c9d1d9] relative min-h-screen flex flex-col justify-between p-6 md:p-10 select-none">
+    
+    <div class="bg-grid"></div>
 
-    <div class="bg-gradient-mesh"></div>
-
-    <header class="border-b border-slate-900/60 bg-slate-950/60 backdrop-blur-2xl px-6 py-4 sticky top-0 z-40">
-        <div class="max-w-7xl mx-auto flex justify-between items-center">
-            <a href="#" class="flex items-center gap-3 group">
-                <div class="p-2 bg-gradient-to-tr from-sky-500 to-indigo-500 rounded-xl text-slate-950 shadow-[0_0_25px_rgba(56,189,248,0.4)] transform group-hover:rotate-12 transition-transform duration-300">
-                    <i data-lucide="zap" class="w-5 h-5 text-white fill-current"></i>
-                </div>
-                <span class="text-2xl font-display font-black tracking-wider bg-gradient-to-r from-white to-sky-400 bg-clip-text text-transparent">CloudNET</span>
-            </a>
-            <div class="flex items-center gap-8">
-                <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-slate-400">
-                    <a href="#" class="hover:text-sky-400 transition-colors py-1">Главная</a>
-                    <a href="#machines-section" class="hover:text-sky-400 transition-colors py-1">Доступные ПК</a>
-                    <a href="#tariffs" class="hover:text-sky-400 transition-colors py-1">Тарифы</a>
-                </nav>
-                <div id="nav-auth-section">
-                    <button onclick="openModal('auth-modal')" class="px-6 py-2.5 bg-slate-900 border border-slate-800 hover:border-sky-500 text-slate-300 rounded-xl text-sm font-bold transition-all duration-150 transform active:scale-95 active:translate-y-0.5 shadow-md hover:shadow-sky-500/10 cursor-pointer">Войти</button>
-                </div>
-            </div>
-        </div>
-    </header>
-
-    <main class="flex-grow flex flex-col justify-center items-center py-20 px-6 max-w-7xl mx-auto w-full">
-        <div class="w-full text-center space-y-8 my-12" data-aos="fade-up" data-aos-duration="1000">
-            <div class="inline-flex items-center gap-2.5 px-4 py-2 bg-sky-500/10 border border-sky-500/20 rounded-full text-[11px] font-extrabold text-sky-400 uppercase tracking-widest shadow-[0_0_20px_rgba(56,189,248,0.1)]">
-                <span class="w-2 h-2 rounded-full bg-sky-400 animate-ping"></span> GLOBAL WAN NETWORK INTEGRATED
-            </div>
+    <main class="w-full max-w-7xl mx-auto z-10 flex-grow grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        
+        <section class="lg:col-span-5 space-y-6 flex flex-col h-full justify-between">
             
-            <h1 class="text-5xl sm:text-7xl font-display font-black tracking-tight text-white leading-[1.1] max-w-4xl mx-auto">
-                Твой мощный игровой ПК <br><span class="bg-gradient-to-r from-sky-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent neon-text-glow">в клике от тебя.</span>
-            </h1>
-            
-            <p class="text-slate-400 max-w-2xl mx-auto text-base sm:text-lg leading-relaxed">
-                Мгновенный стриминг рабочих столов и игр прямо в браузер из любой точки мира. Нулевой инпут-лаг, аппаратный захват WebRTC.
-            </p>
-
-            <div class="flex flex-col sm:flex-row gap-5 justify-center items-center pt-6">
-                <a href="#machines-section" class="px-8 py-4 bg-gradient-to-r from-sky-500 to-indigo-500 text-slate-950 font-extrabold rounded-xl neon-glow-cyan transform hover:-translate-y-0.5 active:scale-95 active:translate-y-0.5 transition-all duration-150 cursor-pointer flex items-center gap-3 text-base text-white">
-                    <i data-lucide="monitor" class="w-5 h-5 text-white"></i> <span class="text-white">Выбрать компьютер</span>
-                </a>
-                <div id="sub-status-box" class="px-6 py-4 bg-slate-900/40 border border-slate-800/80 backdrop-blur-md rounded-xl text-xs font-mono flex items-center text-slate-400 h-[56px] tracking-wide">
-                    СТАТУС ПОДПИСКИ: ПРОВЕРКА...
+            <div class="bg-[#0d1117]/80 backdrop-blur-md border border-[#30363d] rounded-xl p-6 shadow-2xl">
+                <div class="flex items-center space-x-3 mb-2">
+                    <div class="w-3 h-3 bg-[#58a6ff] rounded-full pulse-fast text-[#58a6ff]"></div>
+                    <span class="text-xs font-bold uppercase tracking-widest text-[#8b949e]">Pipeline Router v3.4 // Online</span>
                 </div>
+                <h1 class="header-title text-2xl md:text-3xl font-bold tracking-tight text-[#f0f6fc]">
+                    CLOUD<span class="text-[#58a6ff]">NET</span> SYSTEM
+                </h1>
+                <p class="text-xs text-[#7d8590] mt-1 font-mono">Центральный узел маршрутизации и распределенного рендеринга.</p>
             </div>
-        </div>
 
-        <section id="machines-section" class="w-full pt-20 border-t border-slate-900/60 mt-10">
-            <div class="flex flex-col sm:flex-row items-center justify-between mb-10 gap-4">
+            <div class="bg-[#0d1117]/80 backdrop-blur-md border border-[#30363d] rounded-xl p-6 shadow-2xl flex-grow my-4 flex flex-col justify-between min-h-[300px]">
                 <div>
-                    <h2 class="text-3xl font-display font-black text-white">Активные игровые хосты</h2>
-                    <p class="text-xs text-slate-500 font-mono mt-1 uppercase tracking-wider">Сессионные ноды, готовые к трансляции видеопотока</p>
+                    <div class="flex justify-between items-center border-b border-[#21262d] pb-3 mb-4">
+                        <h2 class="text-sm font-bold tracking-wider text-[#f0f6fc] uppercase">Доступные терминалы (Nodes)</h2>
+                        <span id="nodes-counter" class="text-xs bg-[#21262d] text-[#58a6ff] px-2 py-0.5 rounded-md font-mono border border-[#30363d]">Agt: 0</span>
+                    </div>
+                    
+                    <div id="machines-container" class="space-y-3 max-h-[280px] overflow-y-auto pr-1">
+                        <div id="no-nodes-fallback" class="text-center py-10 text-[#7d8590] border border-dashed border-[#21262d] rounded-xl bg-[#161b22]/30">
+                            <p class="text-sm">Ожидание подключений `agent.py`...</p>
+                            <p class="text-[10px] text-[#8b949e]/50 mt-1">Убедитесь, что агент запущен и подключен к серверу Railway</p>
+                        </div>
+                    </div>
                 </div>
-                <button onclick="fetchActiveMachines()" class="px-4 py-2 bg-slate-900 border border-slate-800 hover:border-sky-500 text-slate-300 rounded-xl text-xs font-mono tracking-wider transition-all transform active:scale-95 flex items-center gap-2 cursor-pointer">
-                    <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> ОБНОВИТЬ СПИСОК
+
+                <button id="btn-global-disconnect" disabled class="w-full mt-6 bg-[#21262d] border border-[#30363d] text-[#7d8590] py-3 rounded-lg text-xs font-bold uppercase tracking-widest transition-all duration-300 cursor-not-allowed hover:bg-[#f85149]/10 hover:text-[#f85149] hover:border-[#f85149]/40">
+                    Разорвать все активные сессии
                 </button>
             </div>
-            
-            <div id="machines-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
-                <div class="glass-panel p-6 rounded-2xl border-dashed border-slate-800 flex flex-col items-center justify-center text-center py-12 col-span-full">
-                    <i data-lucide="activity" class="w-8 h-8 text-slate-600 mb-3 animate-pulse"></i>
-                    <p class="text-sm font-mono text-slate-500">Подключение к сигнальной ноде для получения списка машин...</p>
+
+            <div class="bg-[#0d1117]/90 border border-[#30363d] rounded-xl p-4 shadow-2xl font-mono text-xs flex flex-col h-[180px]">
+                <div class="flex items-center justify-between border-b border-[#21262d] pb-2 mb-2 text-[#8b949e]">
+                    <span class="uppercase tracking-wider text-[10px] font-bold text-[#79c0ff]">System Terminal Logs</span>
+                    <span class="text-[9px] bg-[#161b22] px-1.5 py-0.5 rounded border border-[#21262d]">WSS CONTEXT</span>
+                </div>
+                <div id="terminal-logs" class="flex-grow overflow-y-auto space-y-1 pr-1 text-[11px] leading-relaxed">
+                    <div class="text-[#8b949e]">[SYSTEM] Инициализация ядра веб-интерфейса...</div>
+                    <div class="text-[#8b949e]">[SYSTEM] Ожидание команды на линк...</div>
                 </div>
             </div>
+
         </section>
 
-        <section id="tariffs" class="w-full pt-24 border-t border-slate-900/60 mt-20">
-            <h2 class="text-3xl sm:text-4xl font-display font-black text-center text-white mb-4" data-aos="fade-down">Тарифы подключения</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto w-full pt-12">
+        <section class="lg:col-span-7 h-full flex flex-col">
+            <div class="bg-[#0d1117]/80 backdrop-blur-md border border-[#30363d] rounded-xl p-4 shadow-2xl flex flex-col justify-between h-full relative overflow-hidden">
                 
-                <div class="glass-panel p-8 rounded-2xl flex flex-col justify-between border-slate-800" data-aos="fade-right">
-                    <div class="space-y-5">
-                        <h3 class="text-xl font-bold text-slate-300">Базовый тест</h3>
-                        <div class="text-4xl font-black text-white">0 ₽</div>
-                        <p class="text-xs text-slate-400 leading-relaxed">Ограничение стрима до 10 минут. Стандартное качество видеопотока.</p>
+                <div class="flex items-center justify-between border-b border-[#21262d] pb-3 mb-3">
+                    <div class="flex items-center space-x-2">
+                        <span class="w-2 h-2 rounded-full bg-[#7d8590]" id="stream-status-dot"></span>
+                        <span class="text-xs uppercase font-bold tracking-wider text-[#f0f6fc]" id="stream-status-text">Экран: Pipeline IDLE</span>
                     </div>
-                    <button class="w-full py-3.5 bg-slate-900 text-slate-500 border border-slate-800 rounded-xl text-xs font-bold uppercase mt-8" disabled>Текущий уровень</button>
+                    <div class="flex items-center space-x-4 text-[10px] font-mono text-[#7d8590]">
+                        <span id="meta-fps">FPS: --</span>
+                        <span id="meta-rtt">RTT: -- ms</span>
+                    </div>
                 </div>
 
-                <div class="glass-panel p-8 rounded-2xl flex flex-col justify-between border-sky-500/30 relative neon-glow-cyan bg-slate-950/40" data-aos="fade-up">
-                    <div class="absolute -top-3.5 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-sky-500 to-indigo-500 text-slate-950 text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full text-white">РЕКОМЕНДУЕМЫЙ</div>
-                    <div class="space-y-5">
-                        <h3 class="text-xl font-bold text-white flex items-center gap-2">PRO Доступ</h3>
-                        <div class="text-4xl font-black text-sky-400">490 ₽ <span class="text-xs text-slate-500 font-normal">/ мес</span></div>
-                        <p class="text-xs text-slate-300 leading-relaxed">60 FPS, Full HD трансляция, приоритетный битрейт звука, полный сквозной проброс DirectInput мыши.</p>
+                <div class="video-container relative bg-[#010409] border border-[#21262d] rounded-lg overflow-hidden flex items-center justify-center min-h-[400px] lg:min-h-[500px] aspect-video group">
+                    
+                    <video id="game-video-element" autoplay playsinline class="w-full h-full object-contain z-10 hidden cursor-none"></video>
+                    
+                    <div id="custom-stream-cursor" class="absolute w-4 h-4 pointer-events-none z-50 hidden transition-transform duration-75">
+                        <svg viewBox="0 0 24 24" class="w-full h-full fill-[#58a6ff] drop-shadow-[0_0_4px_rgba(88,166,255,0.8)]">
+                            <path d="M4.5 3V19.5L9.75 14.25H18.75L4.5 3Z" stroke="white" stroke-width="1.5" stroke-linejoin="round"/>
+                        </svg>
                     </div>
-                    <button id="btn-buy" onclick="openModal('checkout-modal')" class="w-full py-3.5 bg-gradient-to-r from-sky-500 to-indigo-500 text-white rounded-xl text-xs font-black uppercase tracking-wider mt-8 transform active:scale-95 active:translate-y-0.5 transition-all duration-150 cursor-pointer shadow-lg shadow-sky-500/20">Купить подписку</button>
+
+                    <div id="video-placeholder" class="absolute inset-0 flex flex-col items-center justify-center text-center p-6 space-y-3 z-0 transition-all duration-500">
+                        <div class="p-4 bg-[#161b22] border border-[#30363d] rounded-full text-[#30363d] group-hover:text-[#58a6ff] group-hover:border-[#58a6ff]/40 group-hover:shadow-[0_0_20px_rgba(88,166,255,0.15)] transition-all duration-500">
+                            <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z" />
+                            </svg>
+                        </div>
+                        <div class="space-y-1">
+                            <p class="text-sm font-bold tracking-wide text-[#f0f6fc]">Сигнальный тракт пуст</p>
+                            <p class="text-xs text-[#7d8590] max-w-xs mx-auto">Выберите активный хост из списка слева и отправьте сетевой запрос `Offer` для трансляции</p>
+                        </div>
+                    </div>
+
                 </div>
 
-                <div class="glass-panel p-8 rounded-2xl flex flex-col justify-between border-purple-500/20" data-aos="fade-left">
-                    <div class="space-y-5">
-                        <h3 class="text-xl font-bold text-purple-400">Ultra VIP</h3>
-                        <div class="text-4xl font-black text-white">990 ₽</div>
-                        <p class="text-xs text-slate-400 leading-relaxed">Максимальное 4K разрешение, выделенный шифрованный RTC-канал.</p>
-                    </div>
-                    <button onclick="alert('Доступно скоро!')" class="w-full py-3.5 bg-slate-900 text-purple-300 border border-purple-500/10 rounded-xl text-xs font-bold uppercase mt-8 cursor-pointer transform active:scale-95 transition-all">Выбрать Ultra</button>
+                <div class="mt-3 pt-3 border-t border-[#21262d] flex justify-between items-center text-[10px] text-[#7d8590] font-mono">
+                    <span>CONTROL: MOUSE & KEYBOARD HOVER CAPTURE</span>
+                    <span>PROTO: WebRTC (H.264 / VP8)</span>
                 </div>
 
             </div>
         </section>
+
     </main>
 
-    <div id="pc-modal" class="hidden fixed inset-0 z-50 flex flex-col bg-[#010204] overflow-hidden select-none">
-        <div id="pc-loading-log-view" class="absolute inset-0 z-50 bg-[#02040a] p-8 flex flex-col justify-between">
-            <div class="max-w-4xl w-full mx-auto space-y-6 pt-12">
-                <div class="flex items-center justify-between border-b border-slate-900 pb-5">
-                    <div class="flex items-center gap-3">
-                        <div class="w-2 h-2 rounded-full bg-sky-400 anonymity-ping"></div>
-                        <h3 class="text-sm font-mono font-bold tracking-widest text-slate-200">INITIALIZING SECURE WAN SIGNAL LAYER...</h3>
-                    </div>
-                    <button onclick="disconnectStream()" class="px-4 py-1.5 bg-red-500/10 border border-red-500/20 text-red-400 font-mono text-xs rounded-xl hover:bg-red-500 hover:text-white transition-all cursor-pointer">ABORT</button>
-                </div>
-                <div id="web-terminal-logs" class="cyber-terminal h-[470px] rounded-2xl p-6 overflow-y-auto text-[11px] font-mono space-y-3.5 text-slate-400 shadow-inner"></div>
-            </div>
+    <footer class="w-full max-w-7xl mx-auto z-10 mt-6 pt-4 border-t border-[#21262d] flex flex-col sm:flex-row justify-between items-center text-[10px] font-mono text-[#7d8590] space-y-2 sm:space-y-0">
+        <div>CLOUDNET INFRASTRUCTURE // DESIGNED FOR MULTI-NODE RENDERING API</div>
+        <div class="flex items-center space-x-3">
+            <span class="flex items-center"><span class="w-1.5 h-1.5 bg-[#56d364] rounded-full mr-1.5 animate-ping"></span>SECURE WAN LINK</span>
+            <span>© 2026 CLOUDNET. ALL RIGHTS RESERVED</span>
         </div>
+    </footer>
 
-        <div id="pc-stream-view" class="hidden relative w-full h-full flex items-center justify-center scanline-effect cursor-none">
-            <video id="game-video-element" autoplay playsinline muted class="w-full h-full object-contain pointer-events-none"></video>
-            <div id="custom-cursor" class="absolute w-6 h-6 border border-sky-400 rounded-full pointer-events-none transform -translate-x-1/2 -translate-y-1/2 z-50 mix-blend-difference">
-                <div class="w-1.5 h-1.5 bg-sky-400 rounded-full absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"></div>
-            </div>
-        </div>
-    </div>
-
-    <div id="checkout-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-xl">
-        <div class="glass-panel w-full max-w-md rounded-3xl p-8 relative space-y-6 modal-animate border-sky-500/30 neon-glow-cyan" id="checkout-card">
-            <button onclick="closeModal('checkout-modal')" class="absolute top-5 right-5 text-slate-500 hover:text-white cursor-pointer"><i data-lucide="x" class="w-5 h-5"></i></button>
-            <div id="billing-form-view" class="space-y-5">
-                <h3 class="text-xl font-display font-black text-white flex items-center gap-2.5"><i data-lucide="credit-card" class="text-sky-400"></i> Оплата подписки PRO</h3>
-                <input type="text" id="card-number" placeholder="2202 2712 9443 6108" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white font-mono outline-none">
-                <div class="grid grid-cols-2 gap-4">
-                    <input type="text" id="card-expiry" placeholder="01/36" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white font-mono outline-none">
-                    <input type="password" id="card-cvv" placeholder="529" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-white font-mono outline-none">
-                </div>
-                <button onclick="processFakeBilling()" class="w-full py-4 bg-gradient-to-r from-sky-500 to-indigo-500 text-white font-bold rounded-xl text-xs uppercase tracking-widest transform active:scale-95 active:translate-y-0.5 transition-all duration-150 cursor-pointer shadow-md">Подтвердить транзакцию</button>
-            </div>
-            <div id="billing-loader-view" class="hidden flex flex-col items-center justify-center py-10 space-y-5 text-center">
-                <div class="w-14 h-14 border-4 border-slate-900 border-t-sky-400 rounded-full animate-spin"></div>
-                <h4 id="billing-loader-title" class="text-sm font-mono text-slate-300">Установление соединения со шлюзом...</h4>
-            </div>
-        </div>
-    </div>
-
-    <div id="profile-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-xl">
-        <div class="glass-panel w-full max-w-md rounded-3xl p-8 relative space-y-5 modal-animate border-purple-500/30 neon-glow-purple">
-            <button onclick="closeModal('profile-modal')" class="absolute top-5 right-5 text-slate-500 hover:text-white cursor-pointer"><i data-lucide="x" class="w-5 h-5"></i></button>
-            <div class="flex items-center gap-4 border-b border-slate-900 pb-5">
-                <div class="w-14 h-14 rounded-xl bg-gradient-to-tr from-purple-500 to-sky-400 p-[1.5px] shadow-lg">
-                    <div class="w-full h-full bg-slate-950 rounded-[11px] flex items-center justify-center"><i data-lucide="user" class="text-purple-400 w-6 h-6"></i></div>
-                </div>
-                <div>
-                    <h3 class="text-lg font-bold text-white tracking-wide" id="prof-title-email">Gamer</h3>
-                    <p class="text-[9px] text-slate-500 font-mono tracking-widest">CLOUDNET MEMBER</p>
-                </div>
-            </div>
-            <div class="bg-slate-950 p-5 rounded-xl border border-slate-900 space-y-3 font-mono text-xs">
-                <div class="flex justify-between items-center"><span class="text-slate-500">СТАТУС:</span><span id="prof-badge" class="font-black px-2 py-0.5 rounded text-[10px]">ЗАГРУЗКА...</span></div>
-                <div class="flex justify-between items-center"><span class="text-slate-500">UID:</span><span id="prof-uid" class="text-sky-400 text-[10px]"></span></div>
-            </div>
-            <button onclick="handleLogout()" class="w-full py-3.5 bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500 hover:text-white rounded-xl text-xs font-bold font-mono tracking-widest transform active:scale-95 active:translate-y-0.5 transition-all duration-150 cursor-pointer">ВЫЙТИ ИЗ СИСТЕМЫ</button>
-        </div>
-    </div>
-
-    <div id="auth-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-xl">
-        <div class="glass-panel w-full max-w-md rounded-3xl p-8 relative space-y-5 modal-animate border-sky-500/20" id="auth-card">
-            <button onclick="closeModal('auth-modal')" class="absolute top-5 right-5 text-slate-500 hover:text-white cursor-pointer"><i data-lucide="x" class="w-5 h-5"></i></button>
-            <h3 class="text-lg font-display font-black text-white flex items-center gap-2.5"><i data-lucide="lock" class="text-sky-400 w-5 h-5"></i> Вход в систему</h3>
-            <form onsubmit="handleAuthAction(event)" class="space-y-4">
-                <input type="email" id="auth-email" required placeholder="gamer@cloudnet.ru" class="w-full bg-slate-950 border border-slate-800 focus:border-sky-500 rounded-xl px-4 py-3.5 text-sm text-white outline-none">
-                <input type="password" id="auth-password" required placeholder="••••••••" class="w-full bg-slate-950 border border-slate-800 focus:border-sky-500 rounded-xl px-4 py-3.5 text-sm text-white outline-none">
-                <button type="submit" class="w-full py-3.5 bg-gradient-to-r from-sky-500 to-indigo-500 text-white font-bold rounded-xl text-sm tracking-wide transform active:scale-95 active:translate-y-0.5 transition-all duration-150 cursor-pointer shadow-md">Авторизоваться</button>
-            </form>
-        </div>
-    </div>
-
-    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script>
-        AOS.init({ once: true, offset: 50 });
-        lucide.createIcons();
+        // --- КОНФИГУРАЦИЯ СЕРВЕРА RAILWAY ---
+        // Вставь сюда свой сгенерированный домен из личного кабинета Railway (без http://, просто домен)
+        const RAILWAY_DOMAIN = "cloudnet-core-production.up.railway.app"; 
+        const SIGNALING_SERVER_URL = `wss://${RAILWAY_DOMAIN}`;
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyBayGRxuHyJVi1B8UJpg_Tkgszru4Il4PM",
-            authDomain: "cloudnet-service.firebaseapp.com",
-            projectId: "cloudnet-service",
-            storageBucket: "cloudnet-service.firebasestorage.app",
-            messagingSenderId: "1028780189231",
-            appId: "1:1028780189231:web:046ceeca95e28b41c948da"
-        };
-        firebase.initializeApp(firebaseConfig);
+        // Селекторы DOM дерева
+        const htmlMachinesContainer = document.getElementById('machines-container');
+        const htmlNoNodesFallback = document.getElementById('no-nodes-fallback');
+        const htmlNodesCounter = document.getElementById('nodes-counter');
+        const htmlTerminalLogs = document.getElementById('terminal-logs');
+        const htmlVideoElement = document.getElementById('game-video-element');
+        const htmlVideoPlaceholder = document.getElementById('video-placeholder');
+        const htmlGlobalDisconnect = document.getElementById('btn-global-disconnect');
+        const htmlStreamStatusDot = document.getElementById('stream-status-dot');
+        const htmlStreamStatusText = document.getElementById('stream-status-text');
+        const htmlCustomCursor = document.getElementById('custom-stream-cursor');
+        
+        const htmlMetaFps = document.getElementById('meta-fps');
+        const htmlMetaRtt = document.getElementById('meta-rtt');
 
-        // ВСТАВЬ СЮДА СВОЙ URL (НАПРИМЕР, ОТ NGROK ИЛИ ОБЛАЧНОГО ХОСТИНГА) ОБЯЗАТЕЛЬНО С wss:// В НАЧАЛЕ
-        const SIGNALING_SERVER_URL = "wss://cloudnet-core-production.up.railway.app";
+        // WebRTC и сигнальные стейты сессии
+        let socketSignaling = null;
+        let rtcPeerConnection = null;
+        let rtcDataChannel = null;
+        let activeTargetMachineId = null;
+        let fpsIntervalId = null;
 
-        let currentUser = null, isPremium = false, wsSignaling = null, peerConnection = null, dataChannel = null, lastEscapePress = 0, curX = 960, curY = 540;
-        let globalSocket = null;
+        // Логгер для стильного киберпанк терминала
+        function pushTerminalLog(tag, message, colorClass = "text-[#8b949e]") {
+            const time = new Date().toLocaleTimeString();
+            const logRow = document.createElement('div');
+            logRow.className = `fade-in-card ${colorClass}`;
+            logRow.innerHTML = `<span class="text-[#7d8590]">[${time}]</span> <span class="font-bold">[${tag}]</span> -> ${message}`;
+            htmlTerminalLogs.appendChild(logRow);
+            htmlTerminalLogs.scrollTop = htmlTerminalLogs.scrollHeight;
+        }
 
-        firebase.auth().onAuthStateChanged((user) => {
-            if (user) {
-                currentUser = user;
-                document.getElementById('nav-auth-section').innerHTML = `
-                    <button onclick="openModal('profile-modal')" class="px-5 py-2.5 bg-slate-900 border border-purple-500/30 text-purple-400 text-xs font-mono font-bold rounded-xl tracking-widest transform active:scale-95 active:translate-y-0.5 transition-all duration-150 cursor-pointer">
-                        [ PROFILE_PASSPORT ]
-                    </button>`;
-                document.getElementById('prof-title-email').innerText = user.email;
-                document.getElementById('prof-uid').innerText = user.uid;
-                checkSubscriptionStatus();
-                initGlobalSocket();
-            } else {
-                currentUser = null;
-                isPremium = false;
-                document.getElementById('nav-auth-section').innerHTML = `<button onclick="openModal('auth-modal')" class="px-6 py-2.5 bg-slate-900 border border-slate-800 hover:border-sky-500 text-slate-300 rounded-xl text-sm font-bold transform active:scale-95 active:translate-y-0.5 transition-all duration-150 cursor-pointer">Войти</button>`;
-                document.getElementById('sub-status-box').innerHTML = `<span class="text-slate-500">ТРЕБУЕТСЯ АВТОРИЗАЦИЯ</span>`;
-                document.getElementById('machines-grid').innerHTML = `
-                    <div class="glass-panel p-6 rounded-2xl border-dashed border-slate-800 flex flex-col items-center justify-center text-center py-12 col-span-full">
-                        <i data-lucide="lock" class="w-8 h-8 text-slate-600 mb-3"></i>
-                        <p class="text-sm font-mono text-slate-500">Пожалуйста, авторизуйтесь для просмотра активных хостов.</p>
-                    </div>`;
-                lucide.createIcons();
-            }
-        });
-
-        function checkSubscriptionStatus() {
-            if (!currentUser) return;
-            const subExpiry = localStorage.getItem(`sub_${currentUser.uid}`);
-            const badge = document.getElementById('prof-badge');
+        // --- ИНИЦИАЛИЗАЦИЯ И ПОДКЛЮЧЕНИЕ К RAILWAY ---
+        function connectToSignalingCluster() {
+            pushTerminalLog("CORE", "Подключение к облачному сигнальному серверу Railway...", "text-[#79c0ff]");
             
-            if (subExpiry && Date.now() < parseInt(subExpiry)) {
-                isPremium = true;
-                document.getElementById('sub-status-box').innerHTML = `<span class="text-emerald-400 font-bold tracking-wide flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>PRO ПЛАН: АКТИВЕН</span>`;
-                document.getElementById('btn-buy').innerText = "ПОДПИСКА ОФОРМЛЕНА";
-                if(badge) {
-                    badge.innerText = "PRO PREMIUM"; 
-                    badge.className = "font-bold px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded text-[10px]";
-                }
-            } else {
-                isPremium = false;
-                document.getElementById('sub-status-box').innerHTML = `<span class="text-amber-500 font-bold tracking-wide flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>НЕТ ПОДПИСКИ PRO</span>`;
-                document.getElementById('btn-buy').innerText = "Купить подписку";
-                if(badge) {
-                    badge.innerText = "БАЗОВЫЙ ДОСТУП"; 
-                    badge.className = "font-bold px-2 py-0.5 bg-slate-900 border border-slate-800 text-slate-400 rounded text-[10px]";
-                }
-            }
-        }
+            socketSignaling = new WebSocket(SIGNALING_SERVER_URL);
 
-        function processFakeBilling() {
-            if (!currentUser) return;
-            document.getElementById('billing-form-view').classList.add('hidden');
-            document.getElementById('billing-loader-view').classList.remove('hidden');
-            setTimeout(() => {
-                document.getElementById('billing-loader-title').innerText = "Запись токена транзакции в базу данных CloudNET...";
-                setTimeout(() => {
-                    localStorage.setItem(`sub_${currentUser.uid}`, (Date.now() + (30 * 24 * 60 * 60 * 1000)).toString());
-                    checkSubscriptionStatus(); 
-                    closeModal('checkout-modal'); 
-                    alert("Премиальная подписка PRO на 30 дней успешно зарегистрирована!");
-                    document.getElementById('billing-form-view').classList.remove('hidden'); 
-                    document.getElementById('billing-loader-view').classList.add('hidden');
-                }, 1200);
-            }, 1000);
-        }
-
-        function initGlobalSocket() {
-            if (globalSocket) return;
-            globalSocket = new WebSocket(SIGNALING_SERVER_URL);
-            globalSocket.onopen = () => {
-                fetchActiveMachines();
+            socketSignaling.onopen = () => {
+                pushTerminalLog("CORE", "Успешный линк с Railway. Запрос пула хостов...", "text-[#56d364]");
+                // Запрашиваем список ПК у сервера
+                socketSignaling.send(JSON.stringify({ type: 'get_machines', sender: 'client' }));
             };
-            globalSocket.onmessage = (e) => {
-                const data = jsonParseSafe(e.data);
-                if (data && data.type === "machines_list") {
-                    renderMachines(data.list);
+
+            socketSignaling.onmessage = async (event) => {
+                const data = JSON.parse(event.data);
+
+                // Слушаем входящий список машин
+                if (data.type === 'machines_list') {
+                    renderMachinesPool(data.list);
+                } 
+                // Слушаем ответ SDP Answer от агента через сервер
+                else if (data.type === 'answer') {
+                    pushTerminalLog("RTC", "Получен удаленный SDP Answer. Установка хэндшейка...");
+                    if (rtcPeerConnection) {
+                        await rtcPeerConnection.setRemoteDescription(new RTCSessionDescription({ sdp: data.sdp, type: 'answer' }));
+                        pushTerminalLog("RTC", "Remote Description установлен успешно!", "text-[#56d364]");
+                    }
                 }
             };
-            globalSocket.onclose = () => {
-                globalSocket = null;
-                setTimeout(initGlobalSocket, 5000);
+
+            socketSignaling.onclose = () => {
+                pushTerminalLog("CRIT", "Соединение с Railway потеряно. Реконнект через 4 секунды...", "text-[#f85149]");
+                setTimeout(connectToSignalingCluster, 4000);
+            };
+
+            socketSignaling.onerror = (err) => {
+                pushTerminalLog("ERR", "Ошибка сокет-канала маршрутизации.", "text-[#f85149]");
             };
         }
 
-        function jsonParseSafe(str) {
-            try { return JSON.parse(str); } catch(e) { return null; }
-        }
+        // --- ОТРИСОВКА ПУЛА АГЕНТОВ (МАШИН) ---
+        function renderMachinesPool(machines) {
+            htmlMachinesContainer.innerHTML = '';
+            htmlNodesCounter.innerText = `Agt: ${machines.length}`;
 
-        function fetchActiveMachines() {
-            if (globalSocket && globalSocket.readyState === WebSocket.OPEN) {
-                globalSocket.send(JSON.stringify({ type: "get_machines", sender: "client" }));
-            }
-        }
-
-        function renderMachines(list) {
-            const grid = document.getElementById('machines-grid');
-            if (!list || list.length === 0) {
-                grid.innerHTML = `
-                    <div class="glass-panel p-6 rounded-2xl border-dashed border-slate-800 flex flex-col items-center justify-center text-center py-12 col-span-full">
-                        <i data-lucide="monitor-off" class="w-8 h-8 text-slate-600 mb-3"></i>
-                        <p class="text-sm font-mono text-slate-500">В данный момент нет активных ПК в сети. Запустите agent.py на хосте.</p>
-                    </div>`;
-                lucide.createIcons();
+            if (machines.length === 0) {
+                htmlMachinesContainer.appendChild(htmlNoNodesFallback);
                 return;
             }
 
-            grid.innerHTML = "";
-            list.forEach((machine) => {
-                grid.innerHTML += `
-                    <div class="glass-panel p-6 rounded-2xl border-sky-500/10 flex flex-col justify-between space-y-6 hover:border-sky-500/40 relative overflow-hidden group">
-                        <div class="absolute -right-6 -top-6 w-24 h-24 bg-sky-500/5 rounded-full blur-xl group-hover:bg-sky-500/10 transition-all"></div>
-                        <div class="flex items-start justify-between">
-                            <div class="space-y-1">
-                                <span class="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[9px] font-mono font-black rounded uppercase tracking-wider">ONLINE</span>
-                                <h4 class="text-lg font-bold text-white tracking-wide pt-1">${machine.username}</h4>
-                                <p class="text-[10px] text-slate-500 font-mono">ID: ${machine.id.substring(0,8)}... // SECURE WAN</p>
-                            </div>
-                            <div class="p-3 bg-slate-900 rounded-xl border border-slate-800 text-sky-400 shadow-[0_0_15px_rgba(56,189,248,0.1)]">
-                                <i data-lucide="terminal" class="w-5 h-5"></i>
-                            </div>
-                        </div>
-                        
-                        <button onclick="verifyAuthAndOpen('${machine.id}')" class="w-full py-3 bg-gradient-to-r from-sky-500 to-indigo-500 text-white font-extrabold rounded-xl text-xs uppercase tracking-widest transform active:scale-95 active:translate-y-0.5 transition-all duration-150 cursor-pointer shadow-md hover:shadow-sky-500/20 flex items-center justify-center gap-2">
-                            <i data-lucide="zap" class="w-3.5 h-3.5 fill-current"></i> ПОДКЛЮЧИТЬСЯ
-                        </button>
-                    </div>`;
-            });
-            lucide.createIcons();
-        }
-
-        function verifyAuthAndOpen(machineId) {
-            if (!currentUser) { openModal('auth-modal'); return; }
-            if (!isPremium) { openModal('checkout-modal'); return; }
-            openModal('pc-modal');
-            startWebRTCStreamSession(machineId);
-        }
-
-        function pushTerminalLog(tag, msg, color="text-slate-400") {
-            const term = document.getElementById('web-terminal-logs');
-            const time = new Date().toISOString().split('T')[1].slice(0, -1);
-            const lineId = "log_" + Math.random().toString(36).substring(2, 9);
-            
-            term.innerHTML += `<div class="${color} flex gap-2">[${time}] <span class="text-sky-400">[${tag}]</span> <span id="${lineId}" class="typing-log"></span></div>`;
-            term.scrollTop = term.scrollHeight;
-
-            const targetSpan = document.getElementById(lineId);
-            let i = 0;
-            targetSpan.style.width = "0ch";
-            
-            function typeWriter() {
-                if (i < msg.length) {
-                    targetSpan.innerHTML += msg.charAt(i);
-                    i++;
-                    targetSpan.style.width = `${i}ch`;
-                    setTimeout(typeWriter, 4);
-                } else {
-                    targetSpan.style.borderRight = "none"; 
-                }
-            }
-            typeWriter();
-        }
-
-        async function startWebRTCStreamSession(targetMachineId) {
-            document.getElementById('pc-loading-log-view').style.opacity = "1";
-            document.getElementById('pc-stream-view').classList.add('hidden');
-            document.getElementById('web-terminal-logs').innerHTML = '';
-            
-            pushTerminalLog("SYS", "Связывание структуры сигнального глобального веб-сокета...", "text-yellow-500");
-            
-            wsSignaling = new WebSocket(SIGNALING_SERVER_URL);
-            
-            wsSignaling.onopen = async () => {
-                pushTerminalLog("SOCKET", "Глобальный туннель соединен по протоколу WAN Secure", "text-emerald-400");
-                peerConnection = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
+            machines.forEach(node => {
+                const isCurrentActive = activeTargetMachineId === node.id;
                 
-                dataChannel = peerConnection.createDataChannel("controls");
-                dataChannel.onopen = () => {
-                    pushTerminalLog("DATA", "Канал ввода мыши/клавиатуры DirectInput успешно инициализирован.", "text-emerald-400");
-                    setupControlsAndInteractions();
-                };
-
-                peerConnection.addTransceiver('video', { direction: 'recvonly' });
-
-                peerConnection.ontrack = (event) => {
-                    pushTerminalLog("STREAM", "Поток кодирования медиа-трека перехвачен. Запуск аппаратного рендеринга...", "text-purple-400");
-                    const video = document.getElementById('game-video-element');
-                    video.srcObject = event.streams[0];
-                    
-                    setTimeout(() => {
-                        const logView = document.getElementById('pc-loading-log-view');
-                        logView.classList.add('slide-out-blur');
-                        
-                        setTimeout(() => {
-                            logView.classList.add('hidden');
-                            logView.classList.remove('slide-out-blur');
-                            document.getElementById('pc-stream-view').classList.remove('hidden');
-                            
-                            const container = document.getElementById('pc-stream-view');
-                            if (document.documentElement.requestFullscreen) {
-                                document.documentElement.requestFullscreen().then(() => container.requestPointerLock()).catch(()=>{});
-                            } else {
-                                container.requestPointerLock();
-                            }
-                        }, 650);
-                    }, 1200);
-                };
-
-                const offer = await peerConnection.createOffer();
-                await peerConnection.setLocalDescription(offer);
-                wsSignaling.send(JSON.stringify({ 
-                    type: 'offer', 
-                    sdp: peerConnection.localDescription.sdp, 
-                    sender: 'client',
-                    targetId: targetMachineId
-                }));
-            };
-
-            wsSignaling.onmessage = async (e) => {
-                const msg = JSON.parse(e.data);
-                if (msg.type === 'answer') {
-                    pushTerminalLog("SDP", "Получен глобальный SDP-Answer дескриптор от игрового агента.", "text-emerald-400");
-                    await peerConnection.setRemoteDescription(new RTCSessionDescription(msg));
-                }
-            };
-            wsSignaling.onerror = () => pushTerminalLog("ERR", "Ошибка WAN сети сокета. Проверьте туннель ngrok.", "text-red-500");
-        }
-
-        function setupControlsAndInteractions() {
-            const container = document.getElementById('pc-stream-view');
-            const cursor = document.getElementById('custom-cursor');
-            document.addEventListener('mousemove', (e) => {
-                if (document.pointerLockElement === container && dataChannel?.readyState === 'open') {
-                    dataChannel.send(JSON.stringify({ type: 'mousemove_relative', dx: e.movementX, dy: e.movementY }));
-                    curX = Math.max(0, Math.min(1920, curX + e.movementX)); curY = Math.max(0, Math.min(1080, curY + e.movementY));
-                    cursor.style.left = `${(curX / 1920) * container.clientWidth}px`; cursor.style.top = `${(curY / 1080) * container.clientHeight}px`;
-                }
-            });
-            const sendMouseClick = (type, btn) => {
-                if (document.pointerLockElement === container && dataChannel?.readyState === 'open') dataChannel.send(JSON.stringify({ type: type, button: btn }));
-            };
-            container.addEventListener('mousedown', (e) => sendMouseClick('mousedown', e.button === 0 ? 'left' : 'right'));
-            container.addEventListener('mouseup', (e) => sendMouseClick('mouseup', e.button === 0 ? 'left' : 'right'));
-            window.addEventListener('keydown', (e) => {
-                if (document.pointerLockElement === container && dataChannel?.readyState === 'open') {
-                    if (e.key === "Escape") return; e.preventDefault(); dataChannel.send(JSON.stringify({ type: 'keydown', key: e.key.toLowerCase() }));
-                }
-            });
-            window.addEventListener('keyup', (e) => {
-                if (document.pointerLockElement === container && dataChannel?.readyState === 'open') {
-                    if (e.key === "Escape") return; e.preventDefault(); dataChannel.send(JSON.stringify({ type: 'keyup', key: e.key.toLowerCase() }));
-                }
+                const card = document.createElement('div');
+                card.className = `fade-in-card flex items-center justify-between p-4 bg-[#161b22]/60 rounded-xl border ${isCurrentActive ? 'border-[#58a6ff] bg-[#58a6ff]/5 shadow-[0_0_15px_rgba(88,166,255,0.1)]' : 'border-[#21262d]'} hover:border-[#30363d] transition-all duration-300`;
+                
+                card.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <div class="w-2.5 h-2.5 rounded-full bg-[#56d364] pulse-fast text-[#56d364]"></div>
+                        <div>
+                            <p class="text-xs font-bold text-[#f0f6fc] tracking-wide uppercase">${node.username}</p>
+                            <p class="text-[10px] text-[#7d8590] font-mono">${node.id}</p>
+                        </div>
+                    </div>
+                    <button class="px-4 py-2 text-[10px] font-bold uppercase tracking-wider rounded-lg border transition-all duration-300 ${isCurrentActive ? 'bg-[#f85149]/10 border-[#f85149]/30 text-[#f85149] hover:bg-[#f85149] hover:text-white' : 'bg-[#21262d] border-[#30363d] text-[#c9d1d9] hover:bg-[#58a6ff] hover:text-white hover:border-[#58a6ff] glow-border-blue'}" 
+                        onclick="toggleNodeConnection('${node.id}', '${node.username}')">
+                        ${isCurrentActive ? 'Disconnect' : 'Connect / Offer'}
+                    </button>
+                `;
+                htmlMachinesContainer.appendChild(card);
             });
         }
 
-        window.addEventListener('keydown', (e) => {
-            if (e.key === "Escape") {
-                const now = Date.now();
-                if (now - lastEscapePress < 350) { e.preventDefault(); disconnectStream(); }
-                lastEscapePress = now;
+        // --- УПРАВЛЕНИЕ ЛИНКОМ С АГЕНТОМ (CONNECT / DISCONNECT) ---
+        async function toggleNodeConnection(machineId, username) {
+            if (activeTargetMachineId === machineId) {
+                // Если кликнули по подключенной ноде — отключаем её
+                disconnectActiveSession();
+                return;
             }
-        });
 
-        function disconnectStream() {
-            if (document.fullscreenElement) document.exitFullscreen().catch(()=>{});
-            document.exitPointerLock();
-            if (peerConnection) { try { peerConnection.close(); } catch(e){} peerConnection = null; }
-            if (wsSignaling) { try { wsSignaling.close(); } catch(e){} wsSignaling = null; }
-            dataChannel = null; document.getElementById('pc-modal').classList.add('hidden');
+            // Если уже что-то запущено — сначала глушим старую сессию
+            if (activeTargetMachineId) disconnectActiveSession();
+
+            activeTargetMachineId = machineId;
+            pushTerminalLog("RTC", `Инициализация коннекта к хосту: [${username}]...`, "text-[#79c0ff]");
+
+            // Конфигурируем WebRTC Peer
+            rtcPeerConnection = new RTCPeerConnection({
+                iceServers: [
+                    { urls: 'stun:stun.l.google.com:19302' },
+                    { urls: 'stun:stun1.l.google.com:19302' }
+                ]
+            });
+
+            // БАГ-ФИКС №1: Создаем Канал Данных СТРОГО до создания Offer
+            rtcDataChannel = rtcPeerConnection.createDataChannel("mouse_keyboard_input");
+            
+            rtcDataChannel.onopen = () => {
+                pushTerminalLog("DATA", "Выделенный канал ввода Input (DataChannel) открыт.", "text-[#56d364]");
+                bindInputCapturers(); // Активируем мышь и клаву
+            };
+            
+            rtcDataChannel.onclose = () => {
+                pushTerminalLog("DATA", "Канал ввода Input закрыт.");
+            };
+
+            // Отлавливаем входящий видеопоток
+            rtcPeerConnection.ontrack = (event) => {
+                pushTerminalLog("STREAM", "Канал захвата кадров видеокарты соединен!", "text-[#56d364]");
+                htmlVideoElement.srcObject = event.streams[0];
+                
+                // Красиво переключаем интерфейс с анимацией
+                htmlVideoPlaceholder.classList.add('opacity-0', 'scale-95');
+                setTimeout(() => {
+                    htmlVideoPlaceholder.classList.add('hidden');
+                    htmlVideoElement.classList.remove('hidden');
+                    htmlVideoElement.classList.add('block', 'fade-in-card');
+                    htmlCustomCursor.classList.remove('hidden');
+                    htmlCustomCursor.classList.add('block');
+                }, 300);
+
+                // Обновляем статусбары монитора
+                htmlStreamStatusDot.className = "w-2 h-2 rounded-full bg-[#56d364] pulse-fast text-[#56d364]";
+                htmlStreamStatusText.innerText = `Экран LIVE // PIPELINE ADDR: ${username.toUpperCase()}`;
+                
+                htmlGlobalDisconnect.disabled = false;
+                htmlGlobalDisconnect.classList.remove('bg-[#21262d]', 'text-[#7d8590]', 'cursor-not-allowed');
+                htmlGlobalDisconnect.classList.add('bg-[#161b22]', 'text-[#f85149]', 'border-[#f85149]/30', 'cursor-pointer');
+
+                startPerformanceMonitor();
+            };
+
+            // Создаем SDP видео-ресивер
+            rtcPeerConnection.addTransceiver("video", { direction: "recvonly" });
+
+            // Генерируем локальный Offer
+            const offer = await rtcPeerConnection.createOffer();
+            await rtcPeerConnection.setLocalDescription(offer);
+
+            // Отправляем на Railway для пересылки агенту
+            socketSignaling.send(JSON.stringify({
+                type: 'offer',
+                sdp: rtcPeerConnection.localDescription.sdp,
+                sender: 'client',
+                targetId: machineId
+            }));
+
+            pushTerminalLog("SIGNAL", "Сетевой пакет `SDP Offer` транслирован на Railway.");
+            // Перерисовываем список чтобы кнопка сменилась на Disconnect
+            socketSignaling.send(JSON.stringify({ type: 'get_machines', sender: 'client' }));
         }
 
-        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
-        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
-        function handleAuthAction(e) { e.preventDefault(); closeModal('auth-modal'); firebase.auth().signInWithEmailAndPassword(document.getElementById('auth-email').value, document.getElementById('auth-password').value).then(() => closeModal('auth-modal')).catch(err=>alert(err.message)); }
-        function handleLogout() { firebase.auth().signOut().then(() => { closeModal('profile-modal'); }); }
+        // Функция закрытия текущего активного стрима
+        function disconnectActiveSession() {
+            if (!activeTargetMachineId) return;
+
+            pushTerminalLog("CORE", "Разрыв текущей активной стрим-сессии...", "text-[#f85149]");
+            
+            if (fpsIntervalId) clearInterval(fpsIntervalId);
+            if (rtcDataChannel) rtcDataChannel.close();
+            if (rtcPeerConnection) rtcPeerConnection.close();
+
+            rtcPeerConnection = null;
+            rtcDataChannel = null;
+            activeTargetMachineId = null;
+
+            // Возвращаем дефолтный визуал плеера обратно
+            htmlVideoElement.classList.add('hidden');
+            htmlVideoElement.classList.remove('block');
+            htmlVideoElement.srcObject = null;
+            
+            htmlCustomCursor.classList.add('hidden');
+            htmlCustomCursor.classList.remove('block');
+            
+            htmlVideoPlaceholder.classList.remove('hidden');
+            setTimeout(() => {
+                htmlVideoPlaceholder.classList.remove('opacity-0', 'scale-95');
+            }, 50);
+
+            htmlStreamStatusDot.className = "w-2 h-2 rounded-full bg-[#7d8590]";
+            htmlStreamStatusText.innerText = "Экран: Pipeline IDLE";
+            
+            htmlMetaFps.innerText = "FPS: --";
+            htmlMetaRtt.innerText = "RTT: -- ms";
+
+            htmlGlobalDisconnect.disabled = true;
+            htmlGlobalDisconnect.className = "w-full mt-6 bg-[#21262d] border border-[#30363d] text-[#7d8590] py-3 rounded-lg text-xs font-bold uppercase tracking-widest transition-all duration-300 cursor-not-allowed hover:bg-[#f85149]/10 hover:text-[#f85149] hover:border-[#f85149]/40";
+
+            // Обновляем списки интерфейса
+            socketSignaling.send(JSON.stringify({ type: 'get_machines', sender: 'client' }));
+        }
+
+        // Нажатие на большую нижнюю кнопку сброса
+        htmlGlobalDisconnect.onclick = () => disconnectActiveSession();
+
+        // --- БАГ-ФИКС №2: ИДЕАЛЬНЫЙ ТРАКТ ЗАХВАТА ВВОДА (МЫШЬ + КЛАВИАТУРА) ---
+        function bindInputCapturers() {
+            if (!htmlVideoElement) return;
+
+            // Отслеживание перемещения мыши с учетом масштабирования видео-контейнера
+            htmlVideoElement.addEventListener('mousemove', (event) => {
+                if (rtcDataChannel && rtcDataChannel.readyState === 'open') {
+                    const rect = htmlVideoElement.getBoundingClientRect();
+                    
+                    // БАГ-ФИКС: Рассчитываем точные относительные координаты внутри видеоструктуры (0.0 - 1.0)
+                    const percentX = (event.clientX - rect.left) / rect.width;
+                    const percentY = (event.clientY - rect.top) / rect.height;
+
+                    // Двигаем кастомный CSS-курсор вслед за системным
+                    htmlCustomCursor.style.left = `${event.clientX - rect.left}px`;
+                    htmlCustomCursor.style.top = `${event.clientY - rect.top}px`;
+
+                    // Пакуем и шлем бинарную строку в дата-канал
+                    rtcDataChannel.send(JSON.stringify({
+                        type: 'mousemove',
+                        x: percentX,
+                        y: percentY
+                    }));
+                }
+            });
+
+            // Клики кнопок мыши
+            const handleMouseClicks = (actionType, eventButton) => {
+                if (rtcDataChannel && rtcDataChannel.readyState === 'open') {
+                    // JavaScript: 0 = Левая, 2 = Правая. Агент на Python ждет строки 'left'/'right'
+                    const targetBtn = eventButton === 2 ? 'right' : 'left';
+                    rtcDataChannel.send(JSON.stringify({
+                        type: actionType,
+                        button: targetBtn
+                    }));
+                }
+            };
+
+            htmlVideoElement.addEventListener('mousedown', (e) => handleMouseClicks('mousedown', e.button));
+            htmlVideoElement.addEventListener('mouseup', (e) => handleMouseClicks('mouseup', e.button));
+            
+            // Запрещаем дефолтное контекстное меню Windows на плеере, чтобы работал правый клик в Windows играх
+            htmlVideoElement.addEventListener('contextmenu', e => e.preventDefault());
+
+            // Захват клавиатуры (Слушаем всё окно WINDOW, но фильтруем фокус ввода на бади)
+            const handleKeyboardInject = (actionType, eventContext) => {
+                if (rtcDataChannel && rtcDataChannel.readyState === 'open' && document.activeElement === document.body) {
+                    if (eventContext.key === "Escape") return; // Оставляем Esc для выхода из фуллскрина браузера
+                    
+                    eventContext.preventDefault(); // Блокируем системные горячие клавиши браузера (Tab, Alt, F5)
+                    rtcDataChannel.send(JSON.stringify({
+                        type: actionType,
+                        key: eventContext.key.toLowerCase() // Переводим в нижний регистр для pydirectinput
+                    }));
+                }
+            };
+
+            window.addEventListener('keydown', (e) => handleKeyboardInject('keydown', e));
+            window.addEventListener('keyup', (e) => handleKeyboardInject('keyup', e));
+        }
+
+        // --- МОНИТОРИНГ PERFORMANCE-СТАТИСТИКИ (FPS / RTT ТУННЕЛЯ) ---
+        function startPerformanceMonitor() {
+            if (fpsIntervalId) clearInterval(fpsIntervalId);
+
+            let totalFramesPrev = 0;
+            
+            fpsIntervalId = setInterval(async () => {
+                if (!rtcPeerConnection) return;
+                
+                const stats = await rtcPeerConnection.getStats();
+                stats.forEach(report => {
+                    // Парсим WebRTC Inbound видеопоток
+                    if (report.type === 'inbound-rtp' && report.kind === 'video') {
+                        const framesNow = report.framesDecoded;
+                        const calculatedFps = framesNow - totalFramesPrev;
+                        totalFramesPrev = framesNow;
+                        htmlMetaFps.innerText = `FPS: ${calculatedFps > 0 ? calculatedFps : 0}`;
+                    }
+                    // Расчет задержки (Round Trip Time) сигнала через сервера Railway
+                    if (report.type === 'candidate-pair' && report.state === 'succeeded') {
+                        const rttTime = report.currentRoundTripTime;
+                        if (rttTime !== undefined) {
+                            htmlMetaRtt.innerText = `RTT: ${Math.round(rttTime * 1000)} ms`;
+                        }
+                    }
+                });
+            }, 1000);
+        }
+
+        // Точка входа: запускаем цикл подключения
+        connectToSignalingCluster();
     </script>
 </body>
 </html>
